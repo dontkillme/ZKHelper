@@ -1,0 +1,2 @@
+class GameLendException(Exception):
+    pass

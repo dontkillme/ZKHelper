@@ -8,10 +8,16 @@ BarItemCategorySerializer = create_generic_serializer(BarItemCategory)
 BarItemSerializer = create_generic_serializer(BarItem)
 
 
+class BarItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BarItem
+        fields = ("id", "name", "price", "staff_price", "category_id", "modify_date", "available")
+
+
 class BarReceiptItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = BarReceiptItem
-        fields = ("id", "item_name", "quantity", "price", "item")
+        fields = ("id", "item_name", "quantity", "price", "item_id")
 
 
 class BarReceiptsSerializer(serializers.ModelSerializer):
@@ -34,33 +40,52 @@ class BarReceiptsSerializer(serializers.ModelSerializer):
             items = [x['item_id'] for x in receipt_items]
             items = BarItem.objects.filter(id__in=items)
             items = {x.id: x for x in items}
-            sum = 0 # this will require recalc on each change
+            receipt_sum = self._calc_receipt_sum(items, receipt_items)
             bar_receipt = BarReceipt.objects.create(**validated_data)
             for receipt_item in receipt_items:
-                item = items[receipt_item['item_id']]
-                filled_receipt_item = { # catch exception
+                item = items[receipt_item["item_id"]]
+                filled_receipt_item = {
                     **receipt_item,
                     "item_name": item.name,
                     "price": item.price
                 }
-                sum += item.price * receipt_item["quantity"]
                 items_to_create.append(BarReceiptItem(**filled_receipt_item, bar_receipt=bar_receipt))
             BarReceiptItem.objects.bulk_create(items_to_create)
             #to rewrite this
-            bar_receipt.sum = sum
+            bar_receipt.sum = receipt_sum
             bar_receipt.save()
             return bar_receipt
+
+    @staticmethod
+    def _calc_receipt_sum(items, receipt_items):
+        sum = 0
+        for receipt_item in receipt_items:
+            sum += items[receipt_item["item_id"]].price * receipt_item["quantity"]
+        return sum
 
 
 class BarAccountSerializer(serializers.ModelSerializer):
     nick = serializers.CharField(source="participant.nick", read_only=True)
     receipts = BarReceiptsSerializer(many=True, read_only=True)
-    current_credits = serializers.SerializerMethodField()
+    balance = serializers.SerializerMethodField()
 
     class Meta:
         model = BarAccount
-        fields = "__all__"
+        fields = ("participant_id", "nick", "receipts", "balance", "credits", "created_at")
 
-    def get_current_credits(self, obj):
+    def get_balance(self, obj):
+        current_credits = sum(obj.receipts.all().values_list("sum", flat=True))
+        return obj.credits - current_credits
+
+
+class BarAccountBasicInfoSerializer(serializers.ModelSerializer):
+    is_staff = serializers.BooleanField(source="participant.is_staff")
+    balance = serializers.SerializerMethodField()
+
+    class Meta:
+        model = BarAccount
+        fields = ("balance", "is_staff", "participant_id", "credits")
+
+    def get_balance(self, obj):
         current_credits = sum(obj.receipts.all().values_list("sum", flat=True))
         return obj.credits - current_credits

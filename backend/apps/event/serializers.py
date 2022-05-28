@@ -14,4 +14,3 @@ class FullEventParticipantSerializer(serializers.ModelSerializer):
     class Meta:
         model = EventParticipant
         fields = [field.name for field in EventParticipant._meta.fields] + ["tshirt",]
-

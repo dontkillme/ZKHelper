@@ -12,6 +12,7 @@ class EventParticipant(models.Model):
     ice_extra = models.TextField(blank=True, null=True)
     user = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True)
     accredited = models.BooleanField(default=False)
+    is_staff = models.BooleanField(default=False)
 
 
 class Quest(models.Model):

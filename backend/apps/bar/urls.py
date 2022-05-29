@@ -3,16 +3,88 @@ from rest_framework.routers import SimpleRouter
 from rest_framework import viewsets
 
 from apps.bar.serializers import BarReceiptsSerializer, BarItemSerializer, BarItemCategorySerializer, \
-    BarAccountSerializer, BarAccountBasicInfoSerializer
+    BarAccountSerializer, BarAccountBasicInfoSerializer, BarAccountStackSerializer
 from apps.bar.models import BarAccount, BarReceipt, BarItem, BarItemCategory
 
 router = SimpleRouter()
-router.register(r'item', register_endpoints(BarItem, BarItemSerializer))
-router.register(r'item_category', register_endpoints(BarItemCategory, BarItemCategorySerializer))
-router.register(r'receipt', register_endpoints(BarReceipt, BarReceiptsSerializer))
-router.register(r'bar_account', register_endpoints(BarAccount, BarAccountSerializer))
-router.register(r'account_basics', register_endpoints(BarAccount, BarAccountBasicInfoSerializer,
-                                                      view_cls=viewsets.ReadOnlyModelViewSet))
+router.register(
+    r'item',
+    register_endpoints(
+        BarItem,
+        BarItemSerializer,
+        mth_perms={
+            "GET": ["bar.view_baritem"],
+            "POST": ["bar.add_baritem",],
+            "PUT": ["bar.change_baritem",],
+            "PATCH": ["bar.change_baritem",],
+            "DELETE": ["bar.delete_baritem",]
+        }
+    )
+)
+router.register(
+    r'item_category',
+    register_endpoints(
+        BarItemCategory,
+        BarItemCategorySerializer,
+        mth_perms={
+            "GET": ["bar.view_baritemcategory"],
+            "POST": ["bar.add_baritemcategory",],
+            "PUT": ["bar.change_baritemcategory",],
+            "PATCH": ["bar.change_baritemcategory",],
+            "DELETE": ["bar.delete_baritemcategory",]
+        }
+    )
+)
+router.register(
+    r'receipt',
+    register_endpoints(
+        BarReceipt,
+        BarReceiptsSerializer,
+        mth_perms={
+            "GET": ["bar.view_barreceipts"],
+            "POST": ["bar.add_barreceipts", ],
+            "PUT": ["bar.change_barreceipts", ],
+            "PATCH": ["bar.change_barreceipts", ],
+            "DELETE": ["bar.delete_barreceipts", ]
+        }
+    )
+)
+router.register(
+    r'bar_account',
+    register_endpoints(
+        BarAccount,
+        BarAccountSerializer,
+        mth_perms={
+            "GET": ["bar.view_baraccount"],
+            "POST": ["bar.add_baraccount", ],
+            "PUT": ["bar.change_baraccount", ],
+            "PATCH": ["bar.change_baraccount", ],
+            "DELETE": ["bar.delete_baraccount", ]
+        }
+    )
+)
+router.register(
+    r'account_basics',
+    register_endpoints(
+        BarAccount,
+        BarAccountBasicInfoSerializer,
+        mth_perms={
+            "GET": ["bar.view_baraccount"]
+        },
+        view_cls=viewsets.ReadOnlyModelViewSet
+    )
+)
+router.register(
+    r'account_stack',
+    register_endpoints(
+        BarAccount,
+        BarAccountStackSerializer,
+        mth_perms={
+            "GET": ["bar.view_baraccount"]
+        },
+        view_cls=viewsets.ReadOnlyModelViewSet
+    )
+)
 
 
 urlpatterns = router.urls

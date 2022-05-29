@@ -13,6 +13,7 @@ class EventParticipant(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True)
     accredited = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
+    pin = models.CharField(max_length=255, blank=True, null=True, unique=True) ## think to make hash from it
 
 
 class Quest(models.Model):

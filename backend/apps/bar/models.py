@@ -40,5 +40,6 @@ class BarReceipt(models.Model):
                                   related_name="receipt_modify_by")
     items = models.ManyToManyField(BarItem, through=BarReceiptItem, related_name="bar_items")
     sum = models.DecimalField(max_digits=6, decimal_places=2, default=0.0)
+    history = HistoricalRecords()
 
 

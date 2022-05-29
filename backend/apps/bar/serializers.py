@@ -37,9 +37,7 @@ class BarReceiptsSerializer(serializers.ModelSerializer):
         with transaction.atomic():
             receipt_items = self.items
             items_to_create = []
-            items = [x['item_id'] for x in receipt_items]
-            items = BarItem.objects.filter(id__in=items)
-            items = {x.id: x for x in items}
+            items = self._get_items_instances()
             receipt_sum = self._calc_receipt_sum(items, receipt_items)
             bar_receipt = BarReceipt.objects.create(**validated_data)
             for receipt_item in receipt_items:
@@ -56,6 +54,27 @@ class BarReceiptsSerializer(serializers.ModelSerializer):
             bar_receipt.save()
             return bar_receipt
 
+    # def update(self, instance, validated_data):
+    #     with transaction.atomic():
+    #         receipt_items = self.items
+    #         items = self._get_items_instances()
+    #         current_receipt_items = instance.items.all()
+    #         current_receipt_items = {x.id: x for x in current_receipt_items}
+    #         update_receipts = []
+    #         for receipt_item in receipt_items:
+    #             if "id" in receipt_item:
+    #                 current_receipt_items[receipt_item["id"]]
+    #             else:
+
+
+    def _get_items_instances(self):
+        if not self.items:
+            return
+        items = [x['item_id'] for x in self.items]
+        items = BarItem.objects.filter(id__in=items)
+        items = {x.id: x for x in items}
+        return items
+
     @staticmethod
     def _calc_receipt_sum(items, receipt_items):
         sum = 0
@@ -64,7 +83,14 @@ class BarReceiptsSerializer(serializers.ModelSerializer):
         return sum
 
 
-class BarAccountSerializer(serializers.ModelSerializer):
+class BarAccountBaseSerializer(serializers.ModelSerializer):
+
+    def get_balance(self, obj):
+        current_credits = sum(obj.receipts.all().values_list("sum", flat=True))
+        return obj.credits - current_credits
+
+
+class BarAccountSerializer(BarAccountBaseSerializer):
     nick = serializers.CharField(source="participant.nick", read_only=True)
     receipts = BarReceiptsSerializer(many=True, read_only=True)
     balance = serializers.SerializerMethodField()
@@ -73,12 +99,8 @@ class BarAccountSerializer(serializers.ModelSerializer):
         model = BarAccount
         fields = ("participant_id", "nick", "receipts", "balance", "credits", "created_at")
 
-    def get_balance(self, obj):
-        current_credits = sum(obj.receipts.all().values_list("sum", flat=True))
-        return obj.credits - current_credits
 
-
-class BarAccountBasicInfoSerializer(serializers.ModelSerializer):
+class BarAccountBasicInfoSerializer(BarAccountBaseSerializer):
     is_staff = serializers.BooleanField(source="participant.is_staff")
     balance = serializers.SerializerMethodField()
 
@@ -89,3 +111,30 @@ class BarAccountBasicInfoSerializer(serializers.ModelSerializer):
     def get_balance(self, obj):
         current_credits = sum(obj.receipts.all().values_list("sum", flat=True))
         return obj.credits - current_credits
+
+
+class BarAccountStackSerializer(BarAccountBaseSerializer):
+    nick = serializers.CharField(source="participant.nick", read_only=True)
+    balance = serializers.SerializerMethodField()
+    products = serializers.SerializerMethodField()
+
+    class Meta:
+        model = BarAccount
+        fields = ("participant_id", "nick", "balance", "credits", "created_at", "products")
+
+    def get_products(self, obj):
+        items = obj.receipts.all().values_list("bar_items__item_id", "bar_items__price", "bar_items__quantity")
+        output = {}
+        for item, price, quantity in items:
+            if not item: #rewrite this
+                continue
+            key = (item, price)
+            if key not in output:
+                output[key] = {
+                    "item_id": item,
+                    "price": price,
+                    "quantity": 0
+                }
+            output[key]["quantity"] += quantity
+
+        return output.values()

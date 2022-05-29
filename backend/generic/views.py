@@ -6,6 +6,13 @@ from rest_framework import viewsets
 from django.contrib.auth.models import User
 from generic.serializers import UserSerializer
 from rest_framework.decorators import action
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_http_methods
+from apps.event.models import EventParticipant
+from django.contrib.auth import login
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework.authtoken.models import Token
+import json
 
 
 class UserView(viewsets.ReadOnlyModelViewSet):
@@ -34,3 +41,30 @@ class PingView(ObtainAuthToken):
     def get(self, request):
         return JsonResponse({"success": True}, safe=False)
 
+
+@require_http_methods(["POST",])
+@csrf_exempt
+def pin_login(request):
+    pin = request.POST.get("pin", json.loads(request.body).get("pin"))
+    if not pin: #rewrite
+        return JsonResponse({"login": "missing_pin"}, status=401, safe=False)
+
+    try:
+        participant = EventParticipant.objects.get(pin=str(pin), user__isnull=False)
+    except EventParticipant.DoesNotExist as e:
+        return JsonResponse({"login": "unauthorized"}, status=401, safe=False)
+
+    login(request, participant.user)
+    token, created = Token.objects.get_or_create(user=request.user)
+    return JsonResponse(
+        {
+            "participant_id": participant.id,
+            "participant_nick": participant.nick,
+            "token": token.key,
+            "login": "success",
+            "permissions": list(request.user.get_all_permissions()),
+            "groups": list(request.user.groups.all().values_list("name", flat=True))
+        },
+        status=200,
+        safe=False
+    )

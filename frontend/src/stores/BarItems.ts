@@ -1,8 +1,9 @@
 import { defineStore } from 'pinia';
 
 import axios from 'axios';
-import type {BarItem, BarItemCategory} from "@/models/bar";
+import type {BarItem} from "@/models/bar";
 import {useBarItemCategoriesStore} from "@/stores/BarItemCategories";
+import {useBarAuthStore} from "@/stores/BarAuth";
 
 type RootState = {
   items: BarItem[];
@@ -19,14 +20,10 @@ export const useBarItemsStore = defineStore({
   } as RootState),
   getters: {
     itemCatalog(state) {
-      return state.items.reduce((acc: object, element: BarItem) => {
+      return state.items.reduce((acc: {[key: number]: BarItem}, element: BarItem) => {
         acc[element.id] = element;
         return acc;
       }, {});
-    },
-    categoryCatalog(state) {
-      const barItemCategoriesStore = useBarItemCategoriesStore();
-      return barItemCategoriesStore.categoryCatalog;
     },
     filteredItems(state) {
       const {selectedCategoryId} = useBarItemCategoriesStore();
@@ -40,9 +37,14 @@ export const useBarItemsStore = defineStore({
   },
   actions: {
     async fetchBarItems() {
+      const {token} = useBarAuthStore();
       this.loading = true;
       try {
-        const response = await axios.get('http://192.168.1.64:8000/bar/item/');
+        const response = await axios.get('http://192.168.1.64:8000/bar/item/', {
+          headers: {
+            'Authorization': 'token ' + token,
+          }
+        });
         this.items = response.data;
       }
       catch(error) {

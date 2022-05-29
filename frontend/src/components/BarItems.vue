@@ -4,7 +4,8 @@
   import {useBarItemsStore} from "@/stores/BarItems";
   import {useBarReceiptsStore} from "@/stores/BarReceiptss";
 
-  const {loading, error, categoryCatalog, filteredItems} = storeToRefs(useBarItemsStore())
+  const {loading, error, filteredItems} = storeToRefs(useBarItemsStore())
+  const {categoryCatalog} = storeToRefs(useBarItemCategoriesStore());
   const {fetchBarItems} = useBarItemsStore();
   const {addItemQuantityToOrder} = useBarReceiptsStore();
 
@@ -15,7 +16,7 @@
   Produkty:
   <div v-if="loading">Ładuję produky...</div>
   <div v-if="error">Błąd ładowania produktów!<br>{{ error.message }}</div>
-  <ul v-if="filteredItems" class="bar-items">
+  <ul v-if="filteredItems && categoryCatalog" class="bar-items">
     <li v-for="item in filteredItems" :key="item.id">
       <span>{{ item.name }} ({{ categoryCatalog[item.category_id].name }}) {{ item.price }} zł</span>
       <span v-if="!item.available" class="error">NIEDOSTĘPNY</span>

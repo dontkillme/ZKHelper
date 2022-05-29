@@ -1,14 +1,19 @@
 <script setup lang="ts">
   import {storeToRefs} from "pinia";
   import {useBarReceiptsStore} from "@/stores/BarReceiptss";
+  import { debounce } from "lodash";
+  import {useBarItemsStore} from "@/stores/BarItems";
 
-  const {order, sending, error, hasAnyItemsInOrder, itemCatalog, orderTotal, basic_info_loading, basic_info_error, basic_info} = storeToRefs(useBarReceiptsStore())
+  const {order, sending, error, hasAnyItemsInOrder, orderTotal, basic_info_loading, basic_info_error, basic_info} = storeToRefs(useBarReceiptsStore())
+  const { itemCatalog } = storeToRefs(useBarItemsStore())
   const {addItemQuantityToOrder, takeItemQuantityToOrder, createBarReceipt, fetchAccountBasicInfo} = useBarReceiptsStore();
+
+  const fetchAccountBasicInfoDebounced = debounce((e) => fetchAccountBasicInfo(), 500);
 </script>
 
 <template>
   Zamówienie:<br>
-  Krecha na usera: <input v-model="order.account" v-on:input="fetchAccountBasicInfo()">
+  Krecha na usera: <input v-model="order.account" @input="fetchAccountBasicInfoDebounced">
   <span v-if="basic_info_loading">Wczytuję podsumowanie usera...</span>
   <span v-if="basic_info_error">Błąd wczytywania podsumowanie usera!<br>{{ basic_info_error }}</span>
   <span v-if="basic_info">promocyjne ceny: {{basic_info.is_staff }} stan konta: {{basic_info.balance }} suma wpłat na krechę: {{basic_info.credits}}</span>
@@ -26,6 +31,3 @@
   <span v-if="sending">Zamawiam...</span>
   <span v-if="error">Błąd w zamiawaniu!<br>{{ error }}</span>
 </template>
-
-<style scoped>
-</style>

@@ -3,6 +3,7 @@ import { defineStore } from 'pinia';
 import axios from 'axios';
 import type {BarAccountBasicInfo, BarReceiptOrder} from "@/models/bar";
 import {useBarItemsStore} from "@/stores/BarItems";
+import {useBarAuthStore} from "@/stores/BarAuth";
 
 type RootState = {
   order: BarReceiptOrder;
@@ -28,10 +29,6 @@ export const useBarReceiptsStore = defineStore({
     basic_info: null,
   } as RootState),
   getters: {
-    itemCatalog(state) {
-      const barItemsStore = useBarItemsStore();
-      return barItemsStore.itemCatalog;
-    },
     hasAnyItemsInOrder(state) {
       return 0 < Object.keys(state.order.items).length;
     },
@@ -63,7 +60,7 @@ export const useBarReceiptsStore = defineStore({
       }
     },
     async fetchAccountBasicInfo() {
-      if (this.order.account === null) {
+      if (!this.order.account) {
         this.basic_info = null;
         this.basic_info_error = null;
         this.basic_info_loading = false;
@@ -71,10 +68,18 @@ export const useBarReceiptsStore = defineStore({
       }
 
       this.basic_info_loading = true;
+      this.basic_info_error = null;
+
+      const {token} = useBarAuthStore();
+
       let response;
 
       try {
-        response = await axios.get('http://192.168.1.64:8000/bar/account_basics/' + this.order.account);
+        response = await axios.get('http://192.168.1.64:8000/bar/account_basics/' + this.order.account + '/', {
+          headers: {
+            'Authorization': 'token ' + token,
+          }
+        });
       }
       catch (error) {
         this.basic_info_loading = false;
@@ -98,8 +103,14 @@ export const useBarReceiptsStore = defineStore({
       this.sending = true;
       let response;
 
+      const {token} = useBarAuthStore();
+
       try {
-        response = await axios.post('http://192.168.1.64:8000/bar/receipt/', this.order);
+        response = await axios.post('http://192.168.1.64:8000/bar/receipt/', this.order, {
+          headers: {
+            'Authorization': 'token ' + token,
+          }
+        });
       }
       catch(error) {
         this.sending = false;

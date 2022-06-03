@@ -41,11 +41,11 @@ router.register(
         BarReceipt,
         BarReceiptsSerializer,
         mth_perms={
-            "GET": ["bar.view_barreceipts"],
-            "POST": ["bar.add_barreceipts", ],
-            "PUT": ["bar.change_barreceipts", ],
-            "PATCH": ["bar.change_barreceipts", ],
-            "DELETE": ["bar.delete_barreceipts", ]
+            "GET": ["bar.view_barreceipt"],
+            "POST": ["bar.add_barreceipt", ],
+            "PUT": ["bar.change_barreceipt", ],
+            "PATCH": ["bar.change_barreceipt", ],
+            "DELETE": ["bar.delete_barreceipt", ]
         }
     )
 )

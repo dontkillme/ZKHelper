@@ -42,6 +42,10 @@ class PingView(ObtainAuthToken):
         return JsonResponse({"success": True}, safe=False)
 
 
+class MyAuth(ObtainAuthToken):
+    authentication_classes = []
+
+
 @require_http_methods(["POST",])
 @csrf_exempt
 def pin_login(request):

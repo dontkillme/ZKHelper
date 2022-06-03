@@ -18,6 +18,7 @@ class EventParticipantSerializer(serializers.ModelSerializer):
         }
 
     def is_valid(self, raise_exception=False):
+        self.new_user = None
         if "user" in self.initial_data and self.initial_data["user"] == -1:
             self.new_user = self.initial_data.pop("user")
         if "groups" in self.initial_data:

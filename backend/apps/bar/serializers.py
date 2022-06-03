@@ -5,10 +5,11 @@ from django.db import transaction
 
 
 BarItemCategorySerializer = create_generic_serializer(BarItemCategory)
-BarItemSerializer = create_generic_serializer(BarItem)
 
 
 class BarItemSerializer(serializers.ModelSerializer):
+    category_id = serializers.IntegerField()
+
     class Meta:
         model = BarItem
         fields = ("id", "name", "price", "staff_price", "category_id", "modify_date", "available")
@@ -94,6 +95,7 @@ class BarAccountSerializer(BarAccountBaseSerializer):
     nick = serializers.CharField(source="participant.nick", read_only=True)
     receipts = BarReceiptsSerializer(many=True, read_only=True)
     balance = serializers.SerializerMethodField()
+    participant_id = serializers.IntegerField()
 
     class Meta:
         model = BarAccount
@@ -103,6 +105,7 @@ class BarAccountSerializer(BarAccountBaseSerializer):
 class BarAccountBasicInfoSerializer(BarAccountBaseSerializer):
     is_staff = serializers.BooleanField(source="participant.is_staff")
     balance = serializers.SerializerMethodField()
+    participant_id = serializers.IntegerField()
 
     class Meta:
         model = BarAccount
@@ -117,6 +120,7 @@ class BarAccountStackSerializer(BarAccountBaseSerializer):
     nick = serializers.CharField(source="participant.nick", read_only=True)
     balance = serializers.SerializerMethodField()
     products = serializers.SerializerMethodField()
+    participant_id = serializers.IntegerField()
 
     class Meta:
         model = BarAccount

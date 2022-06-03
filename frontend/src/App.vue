@@ -1,15 +1,13 @@
 <script setup lang="ts">
-import { RouterView } from "vue-router";
+	import { RouterView } from 'vue-router';
 </script>
 
 <template>
-  <header>
-    Zakąki bar
-  </header>
+	<header>Zakąki bar</header>
 
-  <RouterView />
+	<RouterView />
 </template>
 
 <style>
-@import "@/assets/base.css";
+	@import '@/assets/base.css';
 </style>

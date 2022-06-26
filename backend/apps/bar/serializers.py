@@ -88,7 +88,7 @@ class BarAccountBaseSerializer(serializers.ModelSerializer):
 
     def get_balance(self, obj):
         current_credits = sum(obj.receipts.all().values_list("sum", flat=True))
-        return obj.credits - current_credits
+        return format(obj.credits - current_credits, ".2f")
 
 
 class BarAccountSerializer(BarAccountBaseSerializer):
@@ -103,17 +103,14 @@ class BarAccountSerializer(BarAccountBaseSerializer):
 
 
 class BarAccountBasicInfoSerializer(BarAccountBaseSerializer):
+    nick = serializers.CharField(source="participant.nick", read_only=True)
     is_staff = serializers.BooleanField(source="participant.is_staff")
     balance = serializers.SerializerMethodField()
     participant_id = serializers.IntegerField()
 
     class Meta:
         model = BarAccount
-        fields = ("balance", "is_staff", "participant_id", "credits")
-
-    def get_balance(self, obj):
-        current_credits = sum(obj.receipts.all().values_list("sum", flat=True))
-        return obj.credits - current_credits
+        fields = ("balance", "is_staff", "participant_id", "credits", "nick")
 
 
 class BarAccountStackSerializer(BarAccountBaseSerializer):

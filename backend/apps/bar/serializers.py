@@ -39,14 +39,18 @@ class BarReceiptsSerializer(serializers.ModelSerializer):
             receipt_items = self.items
             items_to_create = []
             items = self._get_items_instances()
-            receipt_sum = self._calc_receipt_sum(items, receipt_items)
+            is_staff = False
+            if validated_data.get('account'):
+                is_staff = validated_data['account'].participant.is_staff
+            receipt_sum = self._calc_receipt_sum(items, receipt_items, is_staff)
             bar_receipt = BarReceipt.objects.create(**validated_data)
             for receipt_item in receipt_items:
                 item = items[receipt_item["item_id"]]
+                price = item.staff_price if is_staff else item.price
                 filled_receipt_item = {
                     **receipt_item,
                     "item_name": item.name,
-                    "price": item.price
+                    "price": price
                 }
                 items_to_create.append(BarReceiptItem(**filled_receipt_item, bar_receipt=bar_receipt))
             BarReceiptItem.objects.bulk_create(items_to_create)
@@ -77,10 +81,11 @@ class BarReceiptsSerializer(serializers.ModelSerializer):
         return items
 
     @staticmethod
-    def _calc_receipt_sum(items, receipt_items):
+    def _calc_receipt_sum(items, receipt_items, is_staff=False):
         sum = 0
         for receipt_item in receipt_items:
-            sum += items[receipt_item["item_id"]].price * receipt_item["quantity"]
+            price = items[receipt_item["item_id"]].staff_price if is_staff else items[receipt_item["item_id"]].price
+            sum += price * receipt_item["quantity"]
         return sum
 
 

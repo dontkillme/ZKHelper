@@ -30,6 +30,7 @@ class BarReceiptsSerializer(serializers.ModelSerializer):
 
     def is_valid(self, raise_exception=False):
         self.items = self.initial_data.pop("items")
+        self.staff_price = int(self.initial_data.pop("staff_price", "0"))
         if not self.items:
             raise Exception("Missing item list")
         return super().is_valid(raise_exception=raise_exception)
@@ -39,14 +40,11 @@ class BarReceiptsSerializer(serializers.ModelSerializer):
             receipt_items = self.items
             items_to_create = []
             items = self._get_items_instances()
-            is_staff = False
-            if validated_data.get('account'):
-                is_staff = validated_data['account'].participant.is_staff
-            receipt_sum = self._calc_receipt_sum(items, receipt_items, is_staff)
+            receipt_sum = self._calc_receipt_sum(items, receipt_items, self.staff_price)
             bar_receipt = BarReceipt.objects.create(**validated_data)
             for receipt_item in receipt_items:
                 item = items[receipt_item["item_id"]]
-                price = item.staff_price if is_staff else item.price
+                price = item.staff_price if self.staff_price else item.price
                 filled_receipt_item = {
                     **receipt_item,
                     "item_name": item.name,
@@ -55,6 +53,7 @@ class BarReceiptsSerializer(serializers.ModelSerializer):
                 items_to_create.append(BarReceiptItem(**filled_receipt_item, bar_receipt=bar_receipt))
             BarReceiptItem.objects.bulk_create(items_to_create)
             #to rewrite this
+            bar_receipt.price_mode = self.staff_price
             bar_receipt.sum = receipt_sum
             bar_receipt.save()
             return bar_receipt
@@ -81,10 +80,10 @@ class BarReceiptsSerializer(serializers.ModelSerializer):
         return items
 
     @staticmethod
-    def _calc_receipt_sum(items, receipt_items, is_staff=False):
+    def _calc_receipt_sum(items, receipt_items, staff_price):
         sum = 0
         for receipt_item in receipt_items:
-            price = items[receipt_item["item_id"]].staff_price if is_staff else items[receipt_item["item_id"]].price
+            price = items[receipt_item["item_id"]].staff_price if staff_price else items[receipt_item["item_id"]].price
             sum += price * receipt_item["quantity"]
         return sum
 

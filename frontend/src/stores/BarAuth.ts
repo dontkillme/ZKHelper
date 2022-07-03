@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 
-import api from '@/api';
+import api from 'src/api';
+import { useBarReceiptsStore } from 'stores/BarReceipts';
 
 type RootState = {
 	participantId: string | null;
@@ -50,13 +51,20 @@ export const useBarAuthStore = defineStore({
 				this.token = data.token;
 			} catch (error) {
 				resetState(this);
-				this.error = `${error}`;
+				if (error.status === 401) {
+					this.error = 'Podany PIN nie został odnaleziony w bazie!';
+				} else {
+					this.error = error.message;
+				}
 			}
 
 			this.sending = false;
 		},
 		logout() {
+			const { clearOrder } = useBarReceiptsStore();
+
 			resetState(this);
+			clearOrder();
 		},
 	},
 });

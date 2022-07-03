@@ -26,4 +26,5 @@ export interface BarAccountBasicInfo {
 	balance: number;
 	isStaff: boolean;
 	credits: number;
+	nick: string;
 }

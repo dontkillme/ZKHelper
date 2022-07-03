@@ -1,14 +1,16 @@
-import { defineStore } from 'pinia';
+import { defineStore, storeToRefs } from 'pinia';
 
-import type { BarItem } from '@/models/bar';
-import { useBarItemCategoriesStore } from '@/stores/BarItemCategories';
-import api from '@/api';
+import api from 'src/api';
+import type { BarItem } from 'models/bar';
+import { useBarItemCategoriesStore } from 'stores/BarItemCategories';
+import { useBarReceiptsStore } from 'stores/BarReceipts';
+import removeAccents from 'remove-accents';
 
 type ApiResponse = {
 	id: number;
 	name: string;
-	price: number;
-	staff_price: number;
+	price: string;
+	staff_price: string;
 	category_id: number;
 	modify_date: string;
 	available: boolean;
@@ -16,6 +18,7 @@ type ApiResponse = {
 
 type RootState = {
 	items: BarItem[];
+	searchFilter: string;
 	loading: boolean;
 	error: string | null;
 };
@@ -29,6 +32,7 @@ export const useBarItemsStore = defineStore({
 	state: () =>
 		({
 			items: [],
+			searchFilter: '',
 			loading: false,
 			error: null,
 		} as RootState),
@@ -39,14 +43,29 @@ export const useBarItemsStore = defineStore({
 				return acc;
 			}, {});
 		},
-		filteredItems(state) {
+		filteredItems(state): BarItem[] {
 			const { selectedCategoryId } = useBarItemCategoriesStore();
-			if (selectedCategoryId === null) {
-				return state.items;
-			} else {
-				return state.items.filter((element) => element.categoryId == selectedCategoryId);
+			let items = state.items;
+
+			if (selectedCategoryId !== null) {
+				items = items.filter((element) => element.categoryId == selectedCategoryId);
+			};
+
+			if (state.searchFilter) {
+				const words = removeAccents(state.searchFilter).toLowerCase().split(' ');
+				items = items.filter((element) => {
+					const normalizedName = removeAccents(element.name).toLowerCase();
+					return words.every((word) => normalizedName.indexOf(word) !== -1);
+				})
 			}
+
+			return items;
 		},
+		getItemPrice() {
+			const { orderStaffPrices } = storeToRefs(useBarReceiptsStore());
+
+			return (item: BarItem) => orderStaffPrices.value ? item.staffPrice : item.price;
+		}
 	},
 	actions: {
 		async fetchBarItems() {
@@ -59,15 +78,15 @@ export const useBarItemsStore = defineStore({
 				this.items = data.map((v) => ({
 					id: v.id,
 					name: v.name,
-					price: v.price,
-					staffPrice: v.staff_price,
+					price: parseFloat(v.price),
+					staffPrice: parseFloat(v.staff_price),
 					categoryId: v.category_id,
 					modifyDate: v.modify_date,
 					available: v.available,
-				}));
+				})).sort((a, b) => a.name < b.name ? -1 : 1);
 			} catch (error) {
 				resetState(this);
-				this.error = `${error}`;
+				this.error = error.message;
 			}
 
 			this.loading = false;

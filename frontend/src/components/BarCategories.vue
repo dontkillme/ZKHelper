@@ -1,25 +1,56 @@
 <script setup lang="ts">
 	import { storeToRefs } from 'pinia';
-	import { useBarItemCategoriesStore } from '@/stores/BarItemCategories';
+	import { useBarItemCategoriesStore } from 'stores/BarItemCategories';
+	import { computed } from 'vue';
 
 	const { categories, loading, error, selectedCategoryId } = storeToRefs(useBarItemCategoriesStore());
 	const { fetchBarItemCategories } = useBarItemCategoriesStore();
+
+	const options = computed(() => {
+		return [
+			{
+				label: 'Wszystkie',
+				value: null,
+				class: 'outlined',
+			},
+			...categories.value.map((category) => ({
+				label: category.name,
+				value: category.id,
+				class: 'outlined',
+			})),
+		];
+	});
 
 	fetchBarItemCategories();
 </script>
 
 <template>
-	Kategorie:
-	<div v-if="loading">Ładuję kategorię...</div>
-	<div v-if="error">Błąd ładowania kategorii!<br />{{ error }}</div>
-	<ul v-if="!loading && !error" class="bar-categories">
-		<li>
-			<label for="category-0">Wszystkie</label>
-			<input type="radio" id="category-0" :value="null" v-model="selectedCategoryId" />
-		</li>
-		<li v-for="category in categories" :key="category.id">
-			<label :for="'category-' + category.id">{{ category.name }}</label>
-			<input type="radio" :id="'category-' + category.id" :value="category.id" v-model="selectedCategoryId" />
-		</li>
-	</ul>
+	<q-skeleton
+		v-if="loading"
+		type="QBtn"
+		animation="fade"
+		height="3em"
+		width="100%"
+	/>
+	<q-btn-toggle
+		v-if="!loading && !error"
+		v-model="selectedCategoryId"
+		spread
+		no-caps
+		unelevated
+		toggle-color="primary"
+		color="dark-page"
+		style="height: 3em"
+		:options="options"
+	/>
 </template>
+
+<style lang="scss">
+	.outlined {
+		border-bottom: 1px solid $grey-9;
+
+		& + & {
+			border-left: 1px solid $grey-9;
+		}
+	}
+</style>

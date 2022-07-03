@@ -1,34 +1,70 @@
 <script setup lang="ts">
 	import { storeToRefs } from 'pinia';
-	import { useBarAuthStore } from '@/stores/BarAuth';
+	import { useBarAuthStore } from 'stores/BarAuth';
 	import { ref } from 'vue';
+	import { useQuasar } from 'quasar';
 
-	const { participantNick, isAuthenticated, groups, sending, error } = storeToRefs(useBarAuthStore());
-	const { login, logout } = useBarAuthStore();
+	const { sending, error } = storeToRefs(useBarAuthStore());
+	const { login } = useBarAuthStore();
+	const $q = useQuasar();
 
-	let pin = ref(null);
+	const pin = ref<string | null>(null);
 
-	function loginAction() {
+	async function loginAction() {
 		if (pin.value) {
-			login(pin.value);
-			pin.value = null;
+			await login(Number(pin.value));
+
+			if (error.value) {
+				$q.notify({
+					type: 'negative',
+					caption: error.value,
+					message: 'Błąd logowania!',
+					actions: [
+						{icon: 'close', color: 'white'}
+					]
+				})
+			}
 		}
 	}
 </script>
 
 <template>
-	<div v-if="!isAuthenticated && !sending">
-		Podaj pin:<br /><input type="password" pattern="[0-9]*" inputmode="numeric" v-model="pin" /><button
-			@click="loginAction"
+	<q-form
+		class="absolute-center text-center q-gutter-md"
+		autocorrect="off"
+		autocapitalize="off"
+		autocomplete="off"
+		spellcheck="false"
+		@submit="loginAction"
+	>
+		<q-icon name="lock" size="100px" color="gray-5" />
+		<div class="text-h3">Podaj PIN</div>
+		<div class="text-secondary q-mb-lg">Obsługa baru potrzebuje użyć osobistego PINu, by móc składać zamówienia.</div>
+		<q-input
+			v-model="pin"
+			placeholder="PIN będzie zagwiazdkowany"
+			rounded
+			outlined
+			dense
+			clearable
+			:disable="sending"
+			type="password"
+			input-class="text-center"
+			inputmode="numeric"
+			:rules="[ val => val && 0 < val.length || 'Pin jest wymagany!']"
 		>
-			Login
-		</button>
-	</div>
-	<div v-if="isAuthenticated">
-		Zalogowano jako {{ participantNick }}!
-		<button @click="logout">Wyloguj</button>
-	</div>
-	<div v-if="isAuthenticated">{{ groups }}</div>
-	<div v-if="sending">Loguję...</div>
-	<div v-if="error">Błąd logowania!<br />{{ error }}</div>
+			<template #prepend>
+				<q-icon name="lock" />
+			</template>
+		</q-input>
+		<q-btn
+			type="submit"
+			label="Zaloguj"
+			outline
+			no-caps
+			class="text-grey-5"
+			:loading="sending"
+			:disable="!pin"
+		/>
+	</q-form>
 </template>

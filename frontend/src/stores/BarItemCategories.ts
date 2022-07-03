@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 
-import type { BarItemCategory } from '@/models/bar';
-import api from '@/api';
+import type { BarItemCategory } from 'models/bar';
+import api from 'src/api';
 
 type ApiResponse = {
 	id: number;
@@ -50,7 +50,7 @@ export const useBarItemCategoriesStore = defineStore({
 				}));
 			} catch (error) {
 				resetState(this);
-				this.error = `${error}`;
+				this.error = error.message;
 			}
 
 			this.loading = false;

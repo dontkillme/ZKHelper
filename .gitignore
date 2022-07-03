@@ -3,31 +3,36 @@ venv/
 *.pyc
 *.sqlite
 
-# Logs
-logs
-*.log
+.DS_Store
+.thumbs.db
+node_modules
+
+# Quasar core related directories
+.quasar
+frontend/dist
+
+# Cordova related directories and files
+frontend/src-cordova/node_modules
+frontend/src-cordova/platforms
+frontend/src-cordova/plugins
+frontend/src-cordova/www
+
+# Capacitor related directories and files
+frontend/src-capacitor/www
+frontend/src-capacitor/node_modules
+
+# BEX related directories and files
+frontend/src-bex/www
+frontend/src-bex/js/core
+
+# Log files
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
-
-node_modules
-.DS_Store
-dist
-dist-ssr
-coverage
-*.local
-
-cypress/videos/
-cypress/screenshots/
 
 # Editor directories and files
-.vscode/*
-!.vscode/extensions.json
 .idea
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
-*.sw?

@@ -4,10 +4,7 @@ from rest_framework import serializers
 from django.db import transaction
 
 
-# informacja o braku krechy - 460 nie ma krechy, 404 jak nie ma w ogole uczestnika
-# Dodac flage "staff_price" do rachunku (info)
 # dodatkowo crud dla wszystkich modeli barowych w admin panelu, krechy itd
-# potykacz jesli jest ponizej -10
 
 
 BarItemCategorySerializer = create_generic_serializer(BarItemCategory)
@@ -32,7 +29,8 @@ class BarReceiptsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = BarReceipt
-        fields = ("id", "seller", "account", "bar_items", "created_at", "modify_at", "modify_by", "sum")
+        fields = ("id", "seller", "account", "bar_items", "created_at", "modify_at", "modify_by", "sum",
+                  "price_mode")
 
     def is_valid(self, raise_exception=False):
         self.items = self.initial_data.pop("items")

@@ -3,6 +3,12 @@ from apps.bar.models import BarAccount, BarReceipt, BarItem, BarReceiptItem, Bar
 from rest_framework import serializers
 from django.db import transaction
 
+# wyszukiwanie po ksywie zwraca liste id krechy lub brak jesli user nie ma
+# informacja o braku krechy - 460 nie ma krechy, 404 jak nie ma w ogole uczestnika
+# Dodac flage "staff_price" do rachunku (info)
+# dodatkowo crud dla wszystkich modeli barowych w admin panelu, krechy itd
+# potykacz jesli jest ponizej -10
+
 
 BarItemCategorySerializer = create_generic_serializer(BarItemCategory)
 
@@ -57,19 +63,6 @@ class BarReceiptsSerializer(serializers.ModelSerializer):
             bar_receipt.sum = receipt_sum
             bar_receipt.save()
             return bar_receipt
-
-    # def update(self, instance, validated_data):
-    #     with transaction.atomic():
-    #         receipt_items = self.items
-    #         items = self._get_items_instances()
-    #         current_receipt_items = instance.items.all()
-    #         current_receipt_items = {x.id: x for x in current_receipt_items}
-    #         update_receipts = []
-    #         for receipt_item in receipt_items:
-    #             if "id" in receipt_item:
-    #                 current_receipt_items[receipt_item["id"]]
-    #             else:
-
 
     def _get_items_instances(self):
         if not self.items:

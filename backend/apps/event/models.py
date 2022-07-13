@@ -2,6 +2,9 @@ from django.db import models
 from django.contrib.auth.models import User
 
 
+# system questow taki ze wpisujemy user i quest oraz czy wypelniony.
+
+
 class EventParticipant(models.Model):
     name = models.CharField(max_length=255)
     surname = models.CharField(max_length=255)

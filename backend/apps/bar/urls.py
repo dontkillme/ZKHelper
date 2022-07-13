@@ -6,7 +6,7 @@ from django.urls import path
 from apps.bar.serializers import BarReceiptsSerializer, BarItemSerializer, BarItemCategorySerializer, \
     BarAccountSerializer, BarAccountBasicInfoSerializer, BarAccountStackSerializer
 from apps.bar.models import BarAccount, BarReceipt, BarItem, BarItemCategory
-from apps.bar.views import find_participant_by_nick
+from apps.bar.views import find_participant_by_nick, BarAccountView, BarFullAccountView
 
 router = SimpleRouter()
 router.register(
@@ -62,7 +62,8 @@ router.register(
             "PUT": ["bar.change_baraccount", ],
             "PATCH": ["bar.change_baraccount", ],
             "DELETE": ["bar.delete_baraccount", ]
-        }
+        },
+        view_cls=BarFullAccountView
     )
 )
 router.register(
@@ -73,7 +74,7 @@ router.register(
         mth_perms={
             "GET": ["bar.view_baraccount"]
         },
-        view_cls=viewsets.ReadOnlyModelViewSet
+        view_cls=BarAccountView
     )
 )
 router.register(
@@ -84,7 +85,7 @@ router.register(
         mth_perms={
             "GET": ["bar.view_baraccount"]
         },
-        view_cls=viewsets.ReadOnlyModelViewSet
+        view_cls=BarAccountView
     )
 )
 

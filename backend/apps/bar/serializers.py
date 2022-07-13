@@ -3,7 +3,7 @@ from apps.bar.models import BarAccount, BarReceipt, BarItem, BarReceiptItem, Bar
 from rest_framework import serializers
 from django.db import transaction
 
-# wyszukiwanie po ksywie zwraca liste id krechy lub brak jesli user nie ma
+
 # informacja o braku krechy - 460 nie ma krechy, 404 jak nie ma w ogole uczestnika
 # Dodac flage "staff_price" do rachunku (info)
 # dodatkowo crud dla wszystkich modeli barowych w admin panelu, krechy itd

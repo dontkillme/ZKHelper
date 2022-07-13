@@ -1,6 +1,7 @@
 from django.http.response import JsonResponse
 from apps.event.models import EventParticipant
-
+from rest_framework import viewsets, response
+from django.http import Http404
 
 CHAR_MAP = {
     "a": "[aą]",
@@ -29,3 +30,25 @@ def _build_regex(value):
         else:
             regex += char
     return regex
+
+
+class BarAccountRetrieverMixin:
+    def retrieve(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+        except Http404 as exc:
+            participant = EventParticipant.objects.filter(id=kwargs['pk']).first()
+            if not participant:
+                raise exc
+            else:
+                return response.Response({"error": "missing bar account"}, status=460)
+        serializer = self.get_serializer(instance)
+        return response.Response(serializer.data)
+
+
+class BarFullAccountView(BarAccountRetrieverMixin, viewsets.ModelViewSet):
+    pass
+
+
+class BarAccountView(BarAccountRetrieverMixin, viewsets.ReadOnlyModelViewSet):
+    pass

@@ -17,8 +17,11 @@ CHAR_MAP = {
 
 def find_participant_by_nick(request):
     search = request.GET.get("search")
-    search = _build_regex(search)
-    participants = EventParticipant.objects.filter(nick__iregex=search).values("nick", "baraccount", "id")
+    if search.isnumeric():
+        participants = EventParticipant.objects.filter(id=search).values("nick", "baraccount", "id")
+    else:
+        search = _build_regex(search)
+        participants = EventParticipant.objects.filter(nick__iregex=search).values("nick", "baraccount", "id")
     return JsonResponse(list(participants), safe=False)
 
 

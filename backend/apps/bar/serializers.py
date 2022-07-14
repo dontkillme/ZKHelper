@@ -96,6 +96,22 @@ class BarAccountSerializer(BarAccountBaseSerializer):
         model = BarAccount
         fields = ("participant_id", "nick", "receipts", "balance", "credits", "created_at")
 
+    def create(self, validated_data):
+        try:
+            bar_account = BarAccount.objects.get(participant_id=validated_data["participant_id"])
+            bar_account.credits += validated_data['credits']
+            bar_account.save()
+        except BarAccount.DoesNotExist:
+            bar_account = BarAccount.objects.create(**validated_data)
+
+        bar_account.save()
+        return bar_account
+
+    def update(self, instance, validated_data):
+        instance.credits += validated_data['credits']
+        instance.save()
+        return instance
+
 
 class BarAccountBasicInfoSerializer(BarAccountBaseSerializer):
     nick = serializers.CharField(source="participant.nick", read_only=True)

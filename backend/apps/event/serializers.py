@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from generic.serializers import create_generic_serializer
-from apps.event.models import EventParticipant, Quest, Attraction, TShirt
+from apps.event.models import EventParticipant, Quest, Attraction, TShirt, ParticipantQuests
 from django.contrib.auth.models import User, Group
 
 TShirtSerializer = create_generic_serializer(TShirt)
@@ -37,9 +37,25 @@ class EventParticipantSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
 
+class QuestParticipantSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ParticipantQuests
+        fields = ("participant_id", "quest_id", "notes", "started_at", "end_at", "done", "id")
+        extra_kwargs = {
+            "quest_id": {"required": False, "allow_null": True},
+            "participant_id": {"required": False, "allow_null": True},
+        }
+
+
 class FullEventParticipantSerializer(serializers.ModelSerializer):
     tshirt = TShirtSerializer(many=True, read_only=True)
+    quests = serializers.SerializerMethodField()
 
     class Meta:
         model = EventParticipant
-        fields = [field.name for field in EventParticipant._meta.fields if field.name != "pin"] + ["tshirt",]
+        fields = [field.name for field in EventParticipant._meta.fields if field.name != "pin"] + ["tshirt", "quests"]
+
+    def get_quests(self, obj):
+        quests = ParticipantQuests.objects.filter(participant_id=obj.id).order_by("-started_at")
+        serialized_data = QuestParticipantSerializer(quests, many=True)
+        return serialized_data.data

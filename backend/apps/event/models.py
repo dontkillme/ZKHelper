@@ -25,6 +25,15 @@ class Quest(models.Model):
     reward = models.IntegerField(default=10)
 
 
+class ParticipantQuests(models.Model):
+    quest_id = models.ForeignKey(Quest, on_delete=models.CASCADE, related_name="quest_participant_id")
+    participant_id = models.ForeignKey(EventParticipant, on_delete=models.CASCADE, related_name="participant_quest_id")
+    done = models.BooleanField(default=False)
+    started_at = models.DateTimeField(auto_now_add=True)
+    end_at = models.DateTimeField(auto_now=True)
+    notes = models.TextField(blank=True, null=True)
+
+
 class Attraction(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)

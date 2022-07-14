@@ -3,8 +3,8 @@ from rest_framework.viewsets import ReadOnlyModelViewSet
 from rest_framework.routers import SimpleRouter
 
 from apps.event.serializers import QuestSerializer, EventParticipantSerializer, AttractionSerializer, \
-    FullEventParticipantSerializer, TShirtSerializer
-from apps.event.models import Quest, Attraction, EventParticipant, TShirt
+    FullEventParticipantSerializer, TShirtSerializer, QuestParticipantSerializer
+from apps.event.models import Quest, Attraction, EventParticipant, TShirt, ParticipantQuests
 
 router = SimpleRouter()
 router.register(
@@ -70,13 +70,22 @@ router.register(
         FullEventParticipantSerializer,
         mth_perms={
             "GET": ["event.view_eventparticipant"],
-            "POST": ["event.add_eventparticipant", ],
-            "PUT": ["event.change_eventparticipant", ],
-            "PATCH": ["event.change_eventparticipant", ],
-            "DELETE": ["event.delete_eventparticipant", ]
         },
         view_cls=ReadOnlyModelViewSet)
 )
-
+router.register(
+    r'participant_quest',
+    register_endpoints(
+        ParticipantQuests,
+        QuestParticipantSerializer,
+        mth_perms={
+            "GET": ["event.view_participantquests"],
+            "POST": ["event.add_participantquests", ],
+            "PUT": ["event.change_participantquests", ],
+            "PATCH": ["event.change_participantquests", ],
+            "DELETE": ["event.delete_participantquests", ]
+        }
+    )
+)
 
 urlpatterns = router.urls

@@ -34,7 +34,7 @@ class BarReceiptsSerializer(serializers.ModelSerializer):
 
     def is_valid(self, raise_exception=False):
         self.items = self.initial_data.pop("items")
-        self.staff_price = int(self.initial_data.pop("staff_price", "0"))
+        self.staff_price = int(self.initial_data.pop("price_mode", "0"))
         if not self.items:
             raise Exception("Missing item list")
         return super().is_valid(raise_exception=raise_exception)

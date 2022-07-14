@@ -5,9 +5,9 @@ from generic.helpers import PermissionForMethod
 
 
 def register_endpoints(model, serializer, auth_cls=(TokenAuthentication,), view_cls=viewsets.ModelViewSet,
-                       mth_perms={}):
+                       mth_perms={}, query=None):
     class MainHandler(view_cls):
-        queryset = model.objects.all()
+        queryset = query if query else model.objects.all()
         serializer_class = serializer
         permission_classes = [IsAuthenticated, PermissionForMethod]
         method_permissions = mth_perms

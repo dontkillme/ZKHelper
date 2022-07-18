@@ -9,6 +9,6 @@
 <template>
 	<div v-if="isAuthenticated">
 		<span class="q-mr-md">Zalogowano jako {{ participantNick }}</span>
-		<q-btn outline no-caps @click="logout">Wyloguj</q-btn>
+		<q-btn @click="logout">Wyloguj</q-btn>
 	</div>
 </template>

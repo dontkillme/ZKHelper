@@ -40,7 +40,7 @@
 		unelevated
 		toggle-color="primary"
 		color="dark-page"
-		style="height: 3em"
+		style="height: 3rem"
 		:options="options"
 	/>
 </template>

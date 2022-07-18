@@ -44,8 +44,6 @@
 										<q-btn
 											:class="{'hide-button': !hasAnyItemsInOrder}"
 											@click="orderClearConfirm = true"
-											no-caps
-											outline
 										>
 											Wyczyść zamówienie
 										</q-btn>

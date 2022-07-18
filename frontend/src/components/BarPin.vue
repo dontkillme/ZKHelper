@@ -1,30 +1,32 @@
 <script setup lang="ts">
-	import { storeToRefs } from 'pinia';
 	import { useBarAuthStore } from 'stores/BarAuth';
 	import { ref } from 'vue';
 	import { useQuasar } from 'quasar';
 
-	const { sending, error } = storeToRefs(useBarAuthStore());
 	const { login } = useBarAuthStore();
 	const $q = useQuasar();
 
 	const pin = ref<string | null>(null);
+	const sending = ref(false);
 
 	async function loginAction() {
-		if (pin.value) {
-			await login(Number(pin.value));
+		sending.value = true;
 
-			if (error.value) {
-				$q.notify({
-					type: 'negative',
-					caption: error.value,
-					message: 'Błąd logowania!',
-					actions: [
-						{icon: 'close', color: 'white'}
-					]
-				})
-			}
+		try {
+			await login(Number(pin.value));
 		}
+		catch (error) {
+			$q.notify({
+				type: 'negative',
+				caption: error.message,
+				message: 'Błąd logowania!',
+				actions: [
+					{icon: 'close', color: 'white'}
+				]
+			});
+		}
+
+		sending.value = false;
 	}
 </script>
 

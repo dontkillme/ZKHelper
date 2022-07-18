@@ -8,8 +8,6 @@ type RootState = {
 	participantNick: string | null;
 	groups: string[] | null;
 	token: string | null;
-	sending: boolean;
-	error: string | null;
 };
 
 function resetState(state: RootState) {
@@ -27,8 +25,6 @@ export const useBarAuthStore = defineStore({
 			participantNick: null,
 			groups: null,
 			token: null,
-			sending: false,
-			error: null,
 		} as RootState),
 	getters: {
 		isAuthenticated(state) {
@@ -37,9 +33,6 @@ export const useBarAuthStore = defineStore({
 	},
 	actions: {
 		async login(pin: number) {
-			this.sending = true;
-			this.error = null;
-
 			try {
 				const { data } = await api.post('/pin/', {
 					pin: pin,
@@ -51,14 +44,15 @@ export const useBarAuthStore = defineStore({
 				this.token = data.token;
 			} catch (error) {
 				resetState(this);
-				if (error.status === 401) {
-					this.error = 'Podany PIN nie został odnaleziony w bazie!';
-				} else {
-					this.error = error.message;
-				}
-			}
 
-			this.sending = false;
+				let message = error.message;
+
+				if (error.status === 401) {
+					message = 'Podany PIN nie został odnaleziony w bazie!';
+				}
+
+				throw Error(message);
+			}
 		},
 		logout() {
 			const { clearOrder } = useBarReceiptsStore();

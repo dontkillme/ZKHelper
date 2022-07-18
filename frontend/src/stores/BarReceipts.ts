@@ -4,15 +4,33 @@ import { useBarAuthStore } from 'stores/BarAuth';
 import api from 'src/api';
 import { useBarItemsStore } from 'stores/BarItems';
 
-type ApiResponse = {
-	balance: number;
+type ReceiptHistoryApiResponse = Record<string, {
+	id: number;
+	bar_items: {
+		id: number;
+		item_name: string;
+		quantity: number;
+		price: string;
+	},
+	created_at: string;
+	sum: string;
+}>;
+
+type SearchParticipantsApiResponse = Record<string, {
+	nick: string;
+	baraccount: number;
+	id: number;
+}>;
+
+type BasicInfoApiResponse = {
+	balance: string;
 	is_staff: boolean;
-	credits: number;
+	credits: string;
 	nick: string;
 };
 
 type RootState = {
-	orderAccount: number | null;
+	orderAccount: { label: string, value: number } | null;
 	orderItems: {
 		itemId: number;
 		quantity: number;
@@ -23,6 +41,23 @@ type RootState = {
 	basicInfo: BarAccountBasicInfo | null;
 	basicInfoLoading: boolean;
 	basicInfoError: string | null;
+	accountListLoading: boolean;
+	accountList: {
+		nick: string;
+		account: number;
+	}[];
+	receiptHistoryListLoading: boolean;
+	receiptHistoryList: {
+		id: number;
+		createdAt: Date;
+		sum: number;
+		items: {
+			id: number;
+			name: string;
+			quantity: number;
+			price: number;
+		}[];
+	}[];
 };
 
 function resetOrderState(state: RootState) {
@@ -48,6 +83,10 @@ export const useBarReceiptsStore = defineStore({
 			basicInfoLoading: false,
 			basicInfoError: null,
 			basicInfo: null,
+			accountListLoading: false,
+			accountList: [],
+			receiptHistoryListLoading: false,
+			receiptHistoryList: [],
 		} as RootState),
 	getters: {
 		hasAnyItemsInOrder(state) {
@@ -91,6 +130,45 @@ export const useBarReceiptsStore = defineStore({
 				}
 			}
 		},
+		async fetchReceiptHistory() {
+			this.receiptHistoryListLoading = true;
+
+			try {
+				const { data } = await api.get<ReceiptHistoryApiResponse>(`/bar/receipt/?account=${this.orderAccount?.value}`);
+
+				this.receiptHistoryList = data.map((v) => ({
+					id: v.id,
+					createdAt: new Date(v.created_at),
+					sum: parseFloat(v.sum),
+					items: v.bar_items.map((i) => ({
+						id: i.id,
+						name: i.item_name,
+						quantity: i.quantity,
+						price: parseFloat(i.price),
+					}))
+				}));
+			} catch (error) {
+				this.receiptHistoryList = [];
+			}
+
+			this.receiptHistoryListLoading = false;
+		},
+		async fetchFilteredAccountList(searchValue: string) {
+			this.accountListLoading = true;
+
+			try {
+				const { data } = await api.get<SearchParticipantsApiResponse>(`/bar/search/?search=${searchValue}`);
+
+				this.accountList = data.map((v) => ({
+					label: `${v.nick} (#${v.id})`,
+					value: v.id,
+				}));
+			} catch (error) {
+				this.accountList = [];
+			}
+
+			this.accountListLoading = false;
+		},
 		async fetchAccountBasicInfo() {
 			if (!this.orderAccount) {
 				resetBasicInfoState(this);
@@ -104,12 +182,12 @@ export const useBarReceiptsStore = defineStore({
 			this.basicInfoError = null;
 
 			try {
-				const { data } = await api.get<ApiResponse>(`/bar/account_basics/${this.orderAccount}/`);
+				const { data } = await api.get<BasicInfoApiResponse>(`/bar/account_basics/${this.orderAccount?.value}/`);
 
 				this.basicInfo = {
-					balance: data.balance,
+					balance: parseFloat(data.balance),
 					isStaff: data.is_staff,
-					credits: data.credits,
+					credits: parseFloat(data.credits),
 					nick: data.nick,
 				};
 
@@ -121,32 +199,27 @@ export const useBarReceiptsStore = defineStore({
 
 			this.basicInfoLoading = false;
 		},
+		async addCredits(creditValue: number) {
+			await api.post('bar/bar_account/', {
+				participant_id: this.orderAccount?.value,
+				credits: creditValue,
+			});
+		},
 		async createBarReceipt() {
-			this.sending = true;
-			this.error = null;
-
 			const { participantId } = useBarAuthStore();
 
-			try {
-				await api.post('/bar/receipt/', {
-					account: this.orderAccount,
-					seller: participantId,
-					items: this.orderItems.map((v) => ({
-						item_id: v.itemId,
-						quantity: v.quantity,
-					})),
-				});
-			} catch (error) {
-				this.error = error.message;
-
-				this.sending = false;
-				return;
-			}
+			await api.post('/bar/receipt/', {
+				account: this.orderAccount?.value,
+				seller: participantId,
+				price_mode: Number(this.orderStaffPrices),
+				items: this.orderItems.map((v) => ({
+					item_id: v.itemId,
+					quantity: v.quantity,
+				})),
+			});
 
 			resetOrderState(this);
 			resetBasicInfoState(this);
-
-			this.sending = false;
 		},
 	},
 });

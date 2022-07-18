@@ -1,20 +1,57 @@
 <script setup lang="ts">
+	import { ref } from 'vue';
 	import EmptyComponent from 'components/EmptyComponent.vue'
 	import { storeToRefs } from 'pinia';
 	import { useBarReceiptsStore } from 'stores/BarReceipts';
 	import { useBarItemsStore } from 'stores/BarItems';
+	import { useQuasar } from 'quasar';
 
 	const {
 		orderItems,
-		sending,
 		hasAnyItemsInOrder,
 		orderStaffPrices,
 		orderTotal,
 		basicInfo,
 	} = storeToRefs(useBarReceiptsStore());
+	const $q = useQuasar();
 	const { getItemPrice } = useBarItemsStore();
 	const { itemCatalog } = storeToRefs(useBarItemsStore());
 	const { addItemQuantityToOrder, takeItemQuantityToOrder, createBarReceipt } = useBarReceiptsStore();
+
+	const sending = ref(false);
+
+	async function onSubmit() {
+		sending.value = true;
+
+		try {
+			await createBarReceipt();
+		}
+		catch (error) {
+			$q.notify({
+				type: 'negative',
+				caption: error.message.replace(/\n/, '<br>'),
+				html: true,
+				message: 'Błąd składania zamówienia!',
+				actions: [
+					{icon: 'close', color: 'white'}
+				]
+			})
+
+			sending.value = false;
+			return;
+		}
+
+		$q.notify({
+			type: 'positive',
+			caption: 'Zamówienie złożone.',
+			message: 'Sukces!',
+			actions: [
+				{icon: 'close', color: 'white'}
+			]
+		})
+
+		sending.value = false;
+	}
 </script>
 
 <template>
@@ -57,7 +94,7 @@
 				<q-item-section no-wrap class="text-secondary col-auto">{{ orderItem.quantity }} x {{ $currency(getItemPrice(itemCatalog[orderItem.itemId])) }} = </q-item-section>
 				<q-item-section class="col-auto">{{ $currency(getItemPrice(itemCatalog[orderItem.itemId]) * orderItem.quantity) }}</q-item-section>
 				<q-item-section side>
-					<div class="text-grey-8 q-gutter-xs">
+					<div class="text-grey-5 q-gutter-xs">
 						<q-btn size="1.25rem" flat dense round icon="remove" @click="takeItemQuantityToOrder(orderItem.itemId)" />
 						<q-btn size="1.25rem" flat dense round icon="add" @click="addItemQuantityToOrder(orderItem.itemId)" />
 					</div>
@@ -72,14 +109,14 @@
 			color="primary"
 			size="lg"
 			class="full-width"
-			@click="createBarReceipt"
+			@click="onSubmit"
 			:loading="sending"
 		>
 			<template v-if="basicInfo">
-				Zamów na {{ $currency(orderTotal) }} zł na rachunek
+				Zamów za {{ $currency(orderTotal) }} na rachunek
 			</template>
 			<template v-else>
-				Zamów na {{ $currency(orderTotal) }} zł w gotówce
+				Zamów za {{ $currency(orderTotal) }} w gotówce
 			</template>
 		</q-btn>
 	</div>

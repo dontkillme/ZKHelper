@@ -29,10 +29,24 @@ axiosClient.interceptors.response.use(
 	(error) => {
 		if (axios.isAxiosError(error)) {
 			if (error.response) {
-				if (error.response.data?.detail) {
+				if (error.response.data) {
+					let message;
+					switch (error.response.status) {
+						case 403:
+							message = error.response.data.detail;
+							break;
+						case 400:
+							message = Object.entries(error.response.data)
+								.map(([fieldName, fieldErrors]) => `${fieldName}:\n- ` + fieldErrors.join('\n- '))
+								.join('\n');
+							break;
+						default:
+							message = JSON.stringify(error.response.data);
+					}
+
 					throw {
 						status: error.response.status,
-						message: error.response.data.detail,
+						message,
 					};
 				}
 				throw {

@@ -17,31 +17,35 @@
 		<div
 			class="col-6 col-md-3 col-lg-2"
 			v-for="n in 10"
-			v-bind:key="n"
+			:key="n"
 		>
-			<q-skeleton
-				type="QBtn"
-				animation="fade"
-				height="10em"
-				width="100%"
-			/>
+			<q-responsive :ratio="1">
+				<q-skeleton
+					type="QBtn"
+					animation="fade"
+					height="10em"
+					width="100%"
+				/>
+			</q-responsive>
 		</div>
 	</div>
 	<div v-if="!loading && !error && filteredItems.length" class="col-auto row q-pa-md q-col-gutter-md">
 		<div v-for="item in filteredItems" :key="item.id" class="col-6 col-md-3 col-lg-2">
-			<q-btn
-				outline
-				no-caps
-				:class="{'bar-item': true, 'unavailable': !item.available, 'in-order': orderItemCatalog[item.id]}"
-				:disable="!item.available"
-				@click="addItemQuantityToOrder(item.id)"
-			>
-				<div class="col">
-					<div v-if="!item.available">(Niedostępne)</div>
-					<div>{{ item.name }}</div>
-					<div><span v-if="orderItemCatalog[item.id]">{{ orderItemCatalog[item.id] }} x </span>{{ $currency(getItemPrice(item)) }}</div>
-				</div>
-			</q-btn>
+			<q-responsive :ratio="1">
+				<q-btn
+					outline
+					no-caps
+					:class="{'bar-item': true, 'unavailable': !item.available, 'in-order': orderItemCatalog[item.id]}"
+					:disable="!item.available"
+					@click="addItemQuantityToOrder(item.id)"
+				>
+					<div class="col">
+						<div v-if="!item.available">(Niedostępne)</div>
+						<div>{{ item.name }}</div>
+						<div><span v-if="orderItemCatalog[item.id]">{{ orderItemCatalog[item.id] }} x </span>{{ $currency(getItemPrice(item)) }}</div>
+					</div>
+				</q-btn>
+			</q-responsive>
 		</div>
 	</div>
 	<EmptyComponent
@@ -54,8 +58,6 @@
 
 <style lang="scss">
 	.bar-item {
-		width: 100%;
-		height: 10em;
 		color: $grey-9;
 
 		& .q-btn__content {

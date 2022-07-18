@@ -40,4 +40,8 @@
 	html, body, #q-app, .q-layout, .q-page-container, .q-page {
 		height: 100%;
 	}
+
+	.q-field--dense .q-field__label, .q-item__label--header {
+		font-size: $body-font-size;
+	}
 </style>

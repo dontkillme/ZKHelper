@@ -20,13 +20,3 @@
 		</template>
 	</q-input>
 </template>
-
-<style lang="scss">
-	.outlined {
-		border-bottom: 1px solid $grey-9;
-
-		& + & {
-			border-left: 1px solid $grey-9;
-		}
-	}
-</style>

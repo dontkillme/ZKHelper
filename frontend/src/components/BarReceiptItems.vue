@@ -80,11 +80,13 @@
 		icon="shopping_cart"
 		primary="Brak produktów!"
 		secondary="Dodaj produkty klikając na kafelki obok."
+		class="q-my-md"
 	/>
 	<q-scroll-area
 		v-if="hasAnyItemsInOrder"
 		visible
 		class="col"
+		style="min-height: 20rem;"
 	>
 		<q-list separator>
 			<q-item v-for="orderItem in orderItems" :key="orderItem.itemId">

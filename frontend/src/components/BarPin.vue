@@ -39,8 +39,8 @@
 		spellcheck="false"
 		@submit="loginAction"
 	>
-		<q-icon name="lock" size="100px" color="gray-5" />
-		<div class="text-h3">Podaj PIN</div>
+		<q-icon name="lock" size="5rem" color="gray-5" />
+		<div class="text-h4">Podaj PIN</div>
 		<div class="text-secondary q-mb-lg">Obsługa baru potrzebuje użyć osobistego PINu, by móc składać zamówienia.</div>
 		<q-input
 			v-model="pin"

@@ -7,16 +7,23 @@
 	const { fetchBarItemCategories } = useBarItemCategoriesStore();
 
 	const options = computed(() => {
+		const sharedOptions = {
+			class: 'outlined col-6 col-sm-4 col-md',
+			style: {
+				height: '3rem',
+			},
+		};
+
 		return [
 			{
 				label: 'Wszystkie',
 				value: null,
-				class: 'outlined',
+				...sharedOptions,
 			},
 			...categories.value.map((category) => ({
 				label: category.name,
 				value: category.id,
-				class: 'outlined',
+				...sharedOptions,
 			})),
 		];
 	});
@@ -35,12 +42,13 @@
 	<q-btn-toggle
 		v-if="!loading && !error"
 		v-model="selectedCategoryId"
-		spread
+		no-wrap
 		no-caps
 		unelevated
+		stretch
 		toggle-color="primary"
 		color="dark-page"
-		style="height: 3rem"
+		style="width: 100%; flex-wrap: wrap;"
 		:options="options"
 	/>
 </template>
@@ -48,8 +56,9 @@
 <style lang="scss">
 	.outlined {
 		border-bottom: 1px solid $grey-9;
+		border-right: 1px solid $grey-9;
 
-		& + & {
+		&:first-child {
 			border-left: 1px solid $grey-9;
 		}
 	}

@@ -15,7 +15,7 @@
 <template>
 	<div v-if="loading" class="col-auto row q-pa-md q-col-gutter-md">
 		<div
-			class="col-6 col-md-3 col-lg-2"
+			class="col-6 col-sm-3 col-lg-2"
 			v-for="n in 10"
 			:key="n"
 		>
@@ -30,7 +30,7 @@
 		</div>
 	</div>
 	<div v-if="!loading && !error && filteredItems.length" class="col-auto row q-pa-md q-col-gutter-md">
-		<div v-for="item in filteredItems" :key="item.id" class="col-6 col-md-3 col-lg-2">
+		<div v-for="item in filteredItems" :key="item.id" class="col-6 col-sm-3 col-lg-2">
 			<q-responsive :ratio="1">
 				<q-btn
 					outline
@@ -53,6 +53,7 @@
 		icon="search"
 		primary="Brak produktów!"
 		secondary="W podanym filtrze nie znaleziono żadnych produktów."
+		class="q-my-md"
 	/>
 </template>
 

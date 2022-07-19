@@ -32,7 +32,7 @@
 		v-model="dialogState"
 		@before-show="fetchReceiptHistory"
 	>
-		<q-card style="min-width: 25vw;">
+		<q-card style="width: 30rem; max-width: 80vw;">
 			<q-card-section class="row items-center">
 				<div class="text-h6">Rachunek Uzestnika: {{ basicInfo.nick }}</div>
 				<q-space />
@@ -43,9 +43,9 @@
 
 			<q-card-section>
 				<div class="row justify-between text-center">
-					<div class="col">Stan rachunku: {{ $currency(basicInfo.balance) }}</div>
-					<q-separator vertical />
-					<div class="col">Wpłacone: {{ $currency(basicInfo.credits) }}</div>
+					<div class="col-12 col-sm">Stan rachunku: {{ $currency(basicInfo.balance) }}</div>
+					<q-separator vertical class="gt-xs" />
+					<div class="col-12 col-sm">Wpłacone: {{ $currency(basicInfo.credits) }}</div>
 				</div>
 			</q-card-section>
 

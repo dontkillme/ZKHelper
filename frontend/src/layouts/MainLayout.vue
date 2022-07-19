@@ -1,13 +1,40 @@
+<script setup lang="ts">
+	import HeaderLoginState from 'components/HeaderLoginState.vue';
+
+	import { ref } from 'vue';
+	import { storeToRefs } from 'pinia';
+	import { useBarAuthStore } from 'stores/BarAuth';
+
+	const { isAuthenticated } = storeToRefs(useBarAuthStore());
+
+	const tab = ref('bar');
+</script>
+
 <template>
-	<q-layout view="hHh LpR fFf">
+	<q-layout view="hhh LpR fFf">
 		<q-header bordered>
-			<q-toolbar class="bg-grey-10">
-				<q-toolbar-title shrink>Zakonki App</q-toolbar-title>
-				<q-separator vertical inset spaced />
-				<span class="q-ml-sm q-mt-xs">Bar</span>
-				<q-space />
-				<HeaderLoginState />
-			</q-toolbar>
+			<div class="row">
+				<q-toolbar class="col-12 col-sm bg-grey-10">
+					<q-toolbar-title shrink>Zakonki App</q-toolbar-title>
+					<q-separator vertical inset spaced />
+					<q-tabs v-model="tab" shrink>
+						<q-tab name="bar" label="Bar" />
+					</q-tabs>
+					<q-space />
+					<q-btn
+						flat
+						@click="$q.fullscreen.toggle()"
+						:icon="$q.fullscreen.isActive ? 'fullscreen_exit' : 'fullscreen'"
+					/>
+				</q-toolbar>
+				<q-toolbar
+					v-if="isAuthenticated"
+					class="col-12 col-sm-auto bg-grey-10"
+				>
+					<q-space />
+					<HeaderLoginState />
+				</q-toolbar>
+			</div>
 		</q-header>
 
 		<q-page-container>
@@ -15,10 +42,6 @@
 		</q-page-container>
 	</q-layout>
 </template>
-
-<script setup lang="ts">
-	import HeaderLoginState from 'components/HeaderLoginState.vue';
-</script>
 
 <style lang="scss">
 	.q-layout__section--marginal {

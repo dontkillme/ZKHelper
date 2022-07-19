@@ -70,10 +70,12 @@
 		<div>Uczestnik nie ma otwartego rachunku!</div>
 		<q-btn text-color="grey-5" @click="addCreaditsDialog = true">Otwórz rachunek</q-btn>
 	</div>
-	<div v-if="basicInfo" class="row flex-center text-center vertical-middle">
-		<div class="col-7">Stan rachunku: {{ $currency(basicInfo.balance) }} / {{ $currency(basicInfo.credits) }}</div>
-		<q-separator vertical inset />
-		<div class="col">Ceny obsługi: <q-icon :name="basicInfo.isStaff ? 'check_circle' : 'clear'" /></div>
+	<div v-if="basicInfo" class="row text-center">
+		<div class="col row flex-center" style="height: 100%;">
+			<div class="col-12 col-sm-7">Stan rachunku: {{ $currency(basicInfo.balance) }} / {{ $currency(basicInfo.credits) }}</div>
+			<q-separator vertical inset class="gt-xs"/>
+			<div class="col-12 col-sm">Ceny obsługi: <q-icon :name="basicInfo.isStaff ? 'check_circle' : 'clear'" /></div>
+		</div>
 		<q-separator vertical inset />
 		<div class="col-auto q-pa-sm">
 			<q-btn
@@ -84,8 +86,7 @@
 				flat
 				color="grey-5"
 				size="1.25rem"
-			>
-			</q-btn>
+			/>
 		</div>
 	</div>
 	<q-separator />

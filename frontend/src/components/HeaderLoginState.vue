@@ -8,7 +8,7 @@
 
 <template>
 	<div v-if="isAuthenticated">
-		<span class="q-mr-md">Zalogowano jako {{ participantNick }}</span>
-		<q-btn @click="logout">Wyloguj</q-btn>
+		<span class="q-mr-lg">Zalogowano jako {{ participantNick }}</span>
+		<q-btn flat @click="logout">Wyloguj</q-btn>
 	</div>
 </template>

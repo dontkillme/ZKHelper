@@ -24,16 +24,17 @@
 
 		<div class="column" style="height: 100%;">
 			<div v-if="isAuthenticated" class="col-12 row">
-				<div class="col">
-					<div class="column" style="height: 100%">
+				<div class="col-12 col-md-6">
+					<div>
 						<BarCategories />
 						<BarItemsSearch />
 						<BarItems />
 					</div>
 				</div>
-				<q-separator vertical />
-				<div class="col-4">
+				<q-separator vertical class="gt-sm" />
+				<div class="col-12 col-md">
 					<div class="column" style="height: 100%;">
+						<q-separator class="lt-md" />
 						<q-list separator>
 							<q-item-label header>
 								<div class="row flex-center">

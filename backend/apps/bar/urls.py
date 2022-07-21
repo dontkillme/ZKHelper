@@ -6,7 +6,7 @@ from django.urls import path
 from apps.bar.serializers import BarReceiptsSerializer, BarItemSerializer, BarItemCategorySerializer, \
     BarAccountSerializer, BarAccountBasicInfoSerializer, BarAccountStackSerializer
 from apps.bar.models import BarAccount, BarReceipt, BarItem, BarItemCategory
-from apps.bar.views import find_participant_by_nick, BarAccountView, BarFullAccountView
+from apps.bar.views import BarAccountView, BarFullAccountView, find_participant_by_nick
 
 router = SimpleRouter()
 router.register(

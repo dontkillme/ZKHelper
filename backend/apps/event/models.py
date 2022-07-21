@@ -18,11 +18,17 @@ class EventParticipant(models.Model):
     is_staff = models.BooleanField(default=False)
     pin = models.CharField(max_length=255, blank=True, null=True, unique=True) ## think to make hash from it
 
+    def __str__(self):
+        return "[{}] {} {} {}".format(self.id, self.name, self.surname, self.nick)
+
 
 class Quest(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
     reward = models.IntegerField(default=10)
+
+    def __str__(self):
+        return self.name
 
 
 class ParticipantQuests(models.Model):
@@ -33,6 +39,9 @@ class ParticipantQuests(models.Model):
     end_at = models.DateTimeField(auto_now=True)
     notes = models.TextField(blank=True, null=True)
 
+    def __str__(self):
+        return "[{}] {}".format(self.participant_id, self.quest_id)
+
 
 class Attraction(models.Model):
     name = models.CharField(max_length=255)
@@ -42,9 +51,15 @@ class Attraction(models.Model):
     game_master = models.ForeignKey("EventParticipant", on_delete=models.SET_NULL, blank=True, null=True)
     duration_time = models.IntegerField(default=60)
 
+    def __str__(self):
+        return self.name
+
 
 class TShirt(models.Model):
     event_participant = models.ForeignKey(EventParticipant, on_delete=models.DO_NOTHING, related_name="tshirt")
     size = models.CharField(max_length=16)
     given_out = models.BooleanField(default=False)
     extra = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return self.event_participant.name

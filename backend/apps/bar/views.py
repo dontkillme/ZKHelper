@@ -2,6 +2,7 @@ from django.http.response import JsonResponse
 from apps.event.models import EventParticipant
 from rest_framework import viewsets, response
 from django.http import Http404
+from django.contrib.auth.decorators import login_required
 
 CHAR_MAP = {
     "a": "[aą]",
@@ -17,6 +18,8 @@ CHAR_MAP = {
 
 def find_participant_by_nick(request):
     search = request.GET.get("search")
+    if not request.user.has_perms(['bar.view_baraccount']):
+        return JsonResponse({"error": "Missing permissions for this action"}, status=403)
     if search.isnumeric():
         participants = EventParticipant.objects.filter(id=search).values("nick", "baraccount", "id")
     else:

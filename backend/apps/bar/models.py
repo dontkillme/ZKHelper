@@ -6,6 +6,9 @@ from simple_history.models import HistoricalRecords
 class BarItemCategory(models.Model):
     name = models.CharField(max_length=128)
 
+    def __str__(self):
+        return self.name
+
 
 class BarItem(models.Model):
     name = models.CharField(max_length=255)
@@ -15,6 +18,9 @@ class BarItem(models.Model):
     modify_date = models.DateTimeField(auto_now=True)
     available = models.BooleanField(default=True)
 
+    def __str__(self):
+        return "[{}] {}".format(self.id, self.name)
+
 
 class BarReceiptItem(models.Model):
     bar_receipt = models.ForeignKey("BarReceipt", on_delete=models.DO_NOTHING, related_name="bar_items")
@@ -23,12 +29,18 @@ class BarReceiptItem(models.Model):
     quantity = models.IntegerField(default=1)
     price = models.DecimalField(max_digits=6, decimal_places=2)
 
+    def __str__(self):
+        return self.item_name
+
 
 class BarAccount(models.Model):
     participant = models.OneToOneField(EventParticipant, on_delete=models.DO_NOTHING, primary_key=True)
     credits = models.DecimalField(max_digits=6, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
     history = HistoricalRecords()
+
+    def __str__(self):
+        return "[{}] {} {} {}".format(self.participant.id, self.participant.name, self.participant.surname, self.participant.nick)
 
 
 class BarReceipt(models.Model):
@@ -42,5 +54,8 @@ class BarReceipt(models.Model):
     sum = models.DecimalField(max_digits=6, decimal_places=2, default=0.0)
     price_mode = models.IntegerField(default=0)
     history = HistoricalRecords()
+
+    def __str__(self):
+        return "[{}] {} {} {}".format(self.account_id, self.id, self.created_at, self.sum)
 
 

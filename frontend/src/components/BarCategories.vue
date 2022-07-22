@@ -11,6 +11,7 @@
 			class: 'outlined col-6 col-sm-4 col-md',
 			style: {
 				height: '3rem',
+				borderRadius: '0',
 			},
 		};
 
@@ -39,27 +40,23 @@
 		height="3em"
 		width="100%"
 	/>
-	<q-btn-toggle
-		v-if="!loading && !error"
-		v-model="selectedCategoryId"
-		no-wrap
-		no-caps
-		unelevated
-		stretch
-		toggle-color="primary"
-		color="dark-page"
-		style="width: 100%; flex-wrap: wrap;"
-		:options="options"
-	/>
+	<div class="overflow-hidden">
+		<q-btn-toggle
+			v-if="!loading && !error"
+			v-model="selectedCategoryId"
+			no-caps
+			unelevated
+			toggle-color="primary"
+			color="dark-page"
+			style="margin-right: -1px; flex-wrap: wrap; display: flex"
+			:options="options"
+		/>
+	</div>
 </template>
 
 <style lang="scss">
 	.outlined {
 		border-bottom: 1px solid $grey-9;
 		border-right: 1px solid $grey-9;
-
-		&:first-child {
-			border-left: 1px solid $grey-9;
-		}
 	}
 </style>

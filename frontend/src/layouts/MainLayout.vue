@@ -1,13 +1,23 @@
 <script setup lang="ts">
 	import HeaderLoginState from 'components/HeaderLoginState.vue';
+	import { useQuasar } from 'quasar';
 
-	import { ref } from 'vue';
+	import { ref, getCurrentInstance } from 'vue';
 	import { storeToRefs } from 'pinia';
 	import { useBarAuthStore } from 'stores/BarAuth';
 
 	const { isAuthenticated } = storeToRefs(useBarAuthStore());
 
+	const $q = useQuasar()
+
 	const tab = ref('bar');
+
+    const app = getCurrentInstance();
+    const $window = app?.appContext.config.globalProperties.$window;
+
+	function shouldHideFullscreenMode() {
+		return ($window.navigator.standalone == true) || $window.matchMedia('(display-mode: standalone)').matches || $q.platform.is.iphone;
+	}
 </script>
 
 <template>
@@ -22,6 +32,7 @@
 					</q-tabs>
 					<q-space />
 					<q-btn
+						v-if="!shouldHideFullscreenMode()"
 						flat
 						@click="$q.fullscreen.toggle()"
 						:icon="$q.fullscreen.isActive ? 'fullscreen_exit' : 'fullscreen'"

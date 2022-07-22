@@ -6,24 +6,34 @@
 	import BarReceiptAccount from 'components/BarReceiptAccount.vue';
 	import BarItemsSearch from 'components/BarItemsSearch.vue';
 
-	import { ref } from 'vue';
+	import { computed, ref } from 'vue';
 	import { storeToRefs } from 'pinia';
 	import { useBarAuthStore } from 'stores/BarAuth';
 	import { useBarReceiptsStore } from 'stores/BarReceipts';
+	import EmptyComponent from 'components/EmptyComponent.vue';
 
+	const { hasPermission } = useBarAuthStore();
 	const { isAuthenticated } = storeToRefs(useBarAuthStore());
 	const { hasAnyItemsInOrder } = storeToRefs(useBarReceiptsStore());
 	const { clearOrder } = useBarReceiptsStore();
 
 	const orderClearConfirm = ref(false);
+	const isAllowed = computed(() => hasPermission('bar') || hasPermission('logistyka'));
 </script>
 
 <template>
 	<q-page>
-		<BarPin v-if="!isAuthenticated"/>
+		<BarPin v-if="!isAuthenticated" />
 
-		<div class="column" style="height: 100%;">
-			<div v-if="isAuthenticated" class="col-12 row">
+		<EmptyComponent
+			v-if="isAuthenticated && !isAllowed"
+			icon="block"
+			primary="Brak uprawnień!"
+			secondary="Nie masz dostępu do części barowej aplikacji."
+		/>
+
+		<div v-if="isAuthenticated && isAllowed" class="column" style="height: 100%;">
+			<div class="col-12 row">
 				<div class="col-12 col-md-6">
 					<div>
 						<BarCategories />

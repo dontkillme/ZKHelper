@@ -32,7 +32,8 @@
 
 <template>
 	<q-form
-		class="absolute-center text-center q-gutter-md"
+		class="col column no-wrap flex-center text-center q-gutter-y-md q-mx-md q-pt-xl"
+		style="height: 100%;"
 		autocorrect="off"
 		autocapitalize="off"
 		autocomplete="off"
@@ -42,23 +43,26 @@
 		<q-icon name="lock" size="5rem" color="gray-5" />
 		<div class="text-h4">Podaj PIN</div>
 		<div class="text-secondary q-mb-lg">Obsługa baru potrzebuje użyć osobistego PINu, by móc składać zamówienia.</div>
-		<q-input
-			v-model="pin"
-			placeholder="PIN będzie zagwiazdkowany"
-			rounded
-			outlined
-			dense
-			clearable
-			:disable="sending"
-			type="password"
-			input-class="text-center"
-			inputmode="numeric"
-			:rules="[ val => val && 0 < val.length || 'Pin jest wymagany!']"
-		>
-			<template #prepend>
-				<q-icon name="lock" />
-			</template>
-		</q-input>
+		<div class="row full-width justify-center">
+			<q-input
+				v-model="pin"
+				placeholder="PIN będzie zagwiazdkowany"
+				rounded
+				outlined
+				dense
+				clearable
+				:disable="sending"
+				type="password"
+				input-class="text-center"
+				inputmode="numeric"
+				class="col-12 col-sm-6 col-md-4"
+				:rules="[ val => val && 0 < val.length || 'Pin jest wymagany!' ]"
+			>
+				<template #prepend>
+					<q-icon name="lock" />
+				</template>
+			</q-input>
+		</div>
 		<q-btn
 			type="submit"
 			label="Zaloguj"

@@ -2,6 +2,7 @@
 	import { computed } from 'vue';
 	import { storeToRefs } from 'pinia';
 	import { useBarReceiptsStore } from 'stores/BarReceipts';
+	import { useBarAuthStore } from 'stores/BarAuth';
 	import { date } from 'quasar'
 	import EmptyComponent from 'components/EmptyComponent.vue';
 
@@ -23,8 +24,10 @@
 		receiptHistoryListLoading,
 		receiptHistoryList,
 	} = storeToRefs(useBarReceiptsStore());
+	const { hasPermission } = useBarAuthStore();
 
 	const { fetchReceiptHistory } = useBarReceiptsStore()
+	const isAllowed = computed(() => hasPermission('logistyka'));
 </script>
 
 <template>
@@ -34,7 +37,7 @@
 	>
 		<q-card style="width: 30rem; max-width: 80vw;">
 			<q-card-section class="row items-center">
-				<div class="text-h6">Rachunek Uzestnika: {{ basicInfo.nick }}</div>
+				<div class="text-h6">Rachunek Uczestnika: {{ basicInfo.nick }}</div>
 				<q-space />
 				<q-btn icon="close" flat round dense v-close-popup />
 			</q-card-section>
@@ -52,7 +55,10 @@
 			<q-separator />
 
 			<q-card-actions vertical>
-				<q-btn flat @click="emit('addCreditsDialogRequest')">Wpłać środki</q-btn>
+				<q-btn v-if="isAllowed" flat @click="emit('addCreditsDialogRequest')">Wpłać środki</q-btn>
+				<div v-else class="text-center q-my-sm text-red">
+					Nie masz uprawnień do wpłacania środków!
+				</div>
 			</q-card-actions>
 
 			<q-separator />

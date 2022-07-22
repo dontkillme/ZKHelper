@@ -94,7 +94,7 @@
 						label="Wpłać środki"
 						type="submit"
 						:loading="sending"
-						:disable="amount"
+						:disable="!amount"
 					/>
 				</q-card-actions>
 			</q-form>

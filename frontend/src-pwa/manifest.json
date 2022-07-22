@@ -1,0 +1,35 @@
+{
+	"$schema": "https://json.schemastore.org/web-manifest-combined.json",
+	"name": "Zakonki App",
+	"short_name": "Zakonki",
+	"description": "Aplikacja pomocnicza konwentu Zakonki.",
+	"display": "fullscreen",
+	"orientation": "portrait-primary",
+	"background_color": "#121212",
+	"theme_color": "#212121",
+	"lang": "pl-PL",
+	"categories": [
+		"social",
+		"utilities",
+		"productivity",
+		"lifestyle",
+		"entertainment"
+	],
+	"icons": [
+		{
+			"src": "icons/favicon-128x128.png",
+			"sizes": "128x128",
+			"type": "image/png"
+		},
+		{
+			"src": "icons/icon-192x192.png",
+			"sizes": "192x192",
+			"type": "image/png"
+		},
+		{
+			"src": "icons/icon-512x512.png",
+			"sizes": "512x512",
+			"type": "image/png"
+		}
+	]
+}

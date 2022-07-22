@@ -60,5 +60,8 @@ export const useBarAuthStore = defineStore({
 			resetState(this);
 			clearOrder();
 		},
+		hasPermission(group: string) {
+			return this.groups?.includes(group);
+		}
 	},
 });

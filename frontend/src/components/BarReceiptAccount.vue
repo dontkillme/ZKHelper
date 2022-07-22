@@ -1,9 +1,10 @@
 <script setup lang="ts">
 	import { storeToRefs } from 'pinia';
 	import { useBarReceiptsStore } from 'stores/BarReceipts';
-	import { ref } from 'vue';
+	import { computed, ref } from 'vue';
 	import BarReceiptHistoryDialog from 'components/BarReceiptHistoryDialog.vue';
 	import BarAddCreditsDialog from 'components/BarAddCreditsDialog.vue';
+	import { useBarAuthStore } from 'stores/BarAuth';
 
 	const {
 		orderAccount,
@@ -13,10 +14,12 @@
 		accountList,
 	} = storeToRefs(useBarReceiptsStore());
 	const { fetchAccountBasicInfo, fetchFilteredAccountList } = useBarReceiptsStore();
+	const { hasPermission } = useBarAuthStore();
 
 	const options = ref([]);
 	const receiptHistoryDialog = ref(false);
 	const addCreaditsDialog = ref(false);
+	const isAllowed = computed(() => hasPermission('logistyka'));
 
 	async function fetchAccountListFilter(val, update, abort) {
 		if (!val.length) {
@@ -68,7 +71,8 @@
 	</q-select>
 	<div v-if="basicInfoError" class="text-center q-mb-sm text-red">
 		<div>Uczestnik nie ma otwartego rachunku!</div>
-		<q-btn text-color="grey-5" @click="addCreaditsDialog = true">Otwórz rachunek</q-btn>
+		<q-btn v-if="isAllowed" text-color="grey-5" @click="addCreaditsDialog = true">Otwórz rachunek</q-btn>
+		<div v-else class="text-center q-my-sm text-red">Nie masz uprawnień do otwarcia rachunku!</div>
 	</div>
 	<div v-if="basicInfo" class="row text-center">
 		<div class="col row flex-center" style="height: 100%;">
@@ -80,12 +84,12 @@
 		<div class="col-auto q-pa-sm">
 			<q-btn
 				@click="receiptHistoryDialog = true"
-				icon="manage_accounts"
+				icon="auto_stories"
 				no-caps
 				round
 				flat
 				color="grey-5"
-				size="1.25rem"
+				size="1rem"
 			/>
 		</div>
 	</div>

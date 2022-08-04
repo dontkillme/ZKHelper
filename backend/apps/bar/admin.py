@@ -6,7 +6,12 @@ class AdminView(admin.ModelAdmin):
     pass
 
 
-admin.site.register(BarReceipt, AdminView)
+class BarReceiptAdmin(admin.ModelAdmin):
+    list_filter = ('items', )
+    filter_horizontal = ('items', )
+
+
+admin.site.register(BarReceipt, BarReceiptAdmin)
 admin.site.register(BarAccount, AdminView)
 admin.site.register(BarItem, AdminView)
 admin.site.register(BarItemCategory, AdminView)

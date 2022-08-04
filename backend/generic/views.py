@@ -8,6 +8,7 @@ from generic.serializers import UserSerializer
 from rest_framework.decorators import action
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
+from django.shortcuts import render, redirect
 from apps.event.models import EventParticipant
 from django.contrib.auth import login
 from django.views.decorators.csrf import csrf_exempt
@@ -72,3 +73,51 @@ def pin_login(request):
         status=200,
         safe=False
     )
+
+
+#####
+
+@require_http_methods(["GET",])
+@csrf_exempt
+def login_page(request):
+    return render(request, "index.html")
+
+
+@require_http_methods(["POST",])
+def login_basic_pin(request):
+    pin = request.POST.get("pin")
+    if not pin:
+        return JsonResponse({"login": "missing_pin"}, status=401, safe=False)
+    try:
+        participant = EventParticipant.objects.get(pin=str(pin), user__isnull=False)
+    except EventParticipant.DoesNotExist as e:
+        return JsonResponse({"login": "unauthorized"}, status=401, safe=False)
+    if not participant.user.has_perms(["event.change_eventparticipant"]):
+        return JsonResponse({"login": "missing permissions"}, status=401, safe=False)
+    login(request, participant.user)
+    return redirect("/basic/dashboard/")
+
+
+@require_http_methods(["GET",])
+@login_required
+def get_dashboard(request):
+    return render(request, "dashboard.html")
+
+
+@require_http_methods(["GET",])
+@login_required
+def get_info_point_view(request):
+    data = EventParticipant.objects.all().values("id", "name", "surname", "nick")
+    return JsonResponse({"view": render(request, "infopoint.html", {"participants": data}).content.decode(), "data": {}}, safe=False)
+
+
+def set_user_by_token(request):
+    #this is a lazy hack, there is a similar thing but i cant remember where, ill rewrite this to middleware
+    token = request.META.get("HTTP_AUTHORIZATION", "").split(" ")[-1]
+    if not token:
+        return JsonResponse({"error": "unauthorized user"}, status=401)
+    try:
+        token = Token.objects.get(key=token)
+    except Token.DoesNotExist:
+        return JsonResponse({"error": "unauthorized user"}, status=401)
+    request.user = token.user

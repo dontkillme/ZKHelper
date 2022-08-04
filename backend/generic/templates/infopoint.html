@@ -1,0 +1,67 @@
+{% spaceless %}
+<div class="infopoint">
+    <div class="participant-list-box" style="display: inline-block; vertical-align: top; margin-right: 10px;">
+        <ul class="participant-list">
+            {% for participant in participants %}
+                <li uid="{{participant.id}}" name="{{participant.name}}" nick="{{participant.nick}}" surname="{{participant.surname}}" class="participant">
+                    [{{participant.id}}] {{participant.name}} "{{participant.nick}}" {{participant.surname}}
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="participant-info" style="display: inline-block">
+        <div>
+            <table class="basic-info">
+                <tr>
+                    <td colspan="2"><button class="accredite-participant">Akredytuj</button></td>
+                </tr>
+                <tr>
+                    <td>ID</td>
+                    <td class="field" name="id"></td>
+                </tr>
+                <tr>
+                    <td>Imię</td>
+                    <td class="field" name="name"></td>
+                </tr>
+                <tr>
+                    <td>Nazwisko</td>
+                    <td class="field" name="surname"></td>
+                </tr>
+                <tr>
+                    <td>Nick</td>
+                    <td class="field" name="nick"></td>
+                </tr>
+                <tr>
+                    <td>Akredytowany</td>
+                    <td class="field" name="accredited"></td>
+                </tr>
+                <tr>
+                    <td>Telefon</td>
+                    <td class="field" name="phone"></td>
+                </tr>
+                <tr>
+                    <td>ICE telefon</td>
+                    <td class="field" name="ice_phone"></td>
+                </tr>
+                <tr>
+                    <td>ICE nazwa</td>
+                    <td class="field" name="ice_name"></td>
+                </tr>
+                <tr>
+                    <td>ICE extra</td>
+                    <td class="field" name="ice_extra"></td>
+                </tr>
+            </table>
+            <table class="tshirts">
+                <tr><td colspan="3">Koszulki</td></tr>
+            </table>
+        </div>
+        <div>
+            <div>
+                <button class="random-quest">Losuj quest</button>
+            </div>
+            <ul class="quest-list"></ul>
+        </div>
+    </div>
+</div>
+{% endspaceless %}

@@ -2,7 +2,7 @@ from django.http.response import JsonResponse
 from apps.event.models import EventParticipant
 from rest_framework import viewsets, response
 from django.http import Http404
-from rest_framework.authtoken.models import Token
+from generic.views import set_user_by_token
 
 CHAR_MAP = {
     "a": "[aą]",
@@ -16,20 +16,8 @@ CHAR_MAP = {
 }
 
 
-def _set_user_by_token(request):
-    #this is a lazy hack, there is a similar thing but i cant remember where, ill rewrite this to middleware
-    token = request.META.get("HTTP_AUTHORIZATION", "").split(" ")[-1]
-    if not token:
-        return JsonResponse({"error": "unauthorized user"}, status=401)
-    try:
-        token = Token.objects.get(key=token)
-    except Token.DoesNotExist:
-        return JsonResponse({"error": "unauthorized user"}, status=401)
-    request.user = token.user
-
-
 def find_participant_by_nick(request):
-    error = _set_user_by_token(request)
+    error = set_user_by_token(request)
     if error:
         return error
     search = request.GET.get("search")

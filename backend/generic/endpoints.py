@@ -1,10 +1,10 @@
 from rest_framework import viewsets
-from rest_framework.authentication import TokenAuthentication
+from rest_framework.authentication import TokenAuthentication, SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
 from generic.helpers import PermissionForMethod
 
 
-def register_endpoints(model, serializer, auth_cls=(TokenAuthentication,), view_cls=viewsets.ModelViewSet,
+def register_endpoints(model, serializer, auth_cls=(TokenAuthentication, SessionAuthentication), view_cls=viewsets.ModelViewSet,
                        mth_perms={}, query=None):
     class MainHandler(view_cls):
         queryset = query if query else model.objects.all()

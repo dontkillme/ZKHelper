@@ -1,10 +1,11 @@
 from generic.endpoints import register_endpoints
 from rest_framework.viewsets import ReadOnlyModelViewSet
 from rest_framework.routers import SimpleRouter
-
+from django.urls import path
 from apps.event.serializers import QuestSerializer, EventParticipantSerializer, AttractionSerializer, \
     FullEventParticipantSerializer, TShirtSerializer, QuestParticipantSerializer
 from apps.event.models import Quest, Attraction, EventParticipant, TShirt, ParticipantQuests
+from apps.event.views import change_tshirt_status, change_accredited_status
 
 router = SimpleRouter()
 router.register(
@@ -88,4 +89,8 @@ router.register(
     )
 )
 
-urlpatterns = router.urls
+urlpatterns = [
+    path('tshirt_state/<int:uid>/', change_tshirt_status),
+    path('tshirt_state/', change_tshirt_status),
+    path('accredited_state/<int:uid>/', change_accredited_status),
+] + router.urls

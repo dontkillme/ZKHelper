@@ -1,0 +1,31 @@
+{% load static %}
+<html>
+<head>
+    <link rel='stylesheet' href='{% static "main.css" %}'>
+    <link rel='stylesheet' href='{% static "jquery-ui.min.css" %}'>
+    <script src='{% static "jquery.min.js" %}'></script>
+    <script src='{% static "jquery-ui.min.js" %}'></script>
+    <script src='{% static "dashboard.js" %}'></script>
+</head>
+<body>
+<div class="views" id="dashboardsTabs">
+    <div class="nav-user-info-box">
+      <a href="/logout"><span class="ui-icon ui-icon-unlocked"></span>{{request.user.username}}</a>
+    </div>
+    <ul>
+        <li><a href="#news">Start</a></li>
+        <li><a href="#infoPoint">InfoPoint</a></li>
+        {% if perms.dashboards.view_lender %}
+            <li><a href="#logisticView">Logistic</a></li>
+        {% endif %}
+    </ul>
+    <div id="news">
+        Nothing new
+    </div>
+    <div id="infoPoint">
+    </div>
+    <div id="logisticView">
+    </div>
+</div>
+</body>
+</html>

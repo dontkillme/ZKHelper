@@ -9,8 +9,23 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('file', nargs='+', type=str)
+        parser.add_argument('tshirts', nargs='+', type=str)
+
+    def _load_tshirts(self, filename):
+        output = {}
+        with open(filename, "r", encoding="utf8") as f:
+            lines = f.readlines()
+            for line in lines:
+                tmp = line.split(",")
+                if tmp[5]:
+                    key = (tmp[0], tmp[1], tmp[2])
+                    output[key] = [tmp[5], tmp[6]]
+        return output
 
     def handle(self, *args, **options):
+        tshirts_list = {}
+        if "tshirts" in options:
+            tshirts_list = self._load_tshirts(options["tshirts"][0])
         with open(options["file"][0], "r", encoding="utf8") as user_file:
             lines = user_file.readlines()
             count_participants = 0
@@ -36,11 +51,11 @@ class Command(BaseCommand):
 
                     if tmp[9] == "1": #is_staff
                         prt_obj.is_staff = 1
-                if tmp[10] and created:
-                    tshirts = tmp[10].split(';')
-                    extra = tmp[11].strip()
-                    for tshirt in tshirts:
-                        TShirt.objects.create(event_participant=prt_obj, size=tshirt, extra=extra)
+                key = (tmp[0], tmp[1], tmp[2])
+                if key in tshirts_list and created:
+                    tshirts = tshirts_list[key]
+                    for tshirt in tshirts[0].split(";"):
+                        TShirt.objects.create(event_participant=prt_obj, size=tshirt, extra=tshirts[1])
                         count_tshirts += 1
                 prt_obj.save()
                 if created:

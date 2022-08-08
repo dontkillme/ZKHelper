@@ -6,9 +6,9 @@ from django.contrib.auth.models import User
 
 
 class EventParticipant(models.Model):
-    name = models.CharField(max_length=255)
-    surname = models.CharField(max_length=255)
-    nick = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, blank=True, null=True)
+    surname = models.CharField(max_length=255, blank=True, null=True)
+    nick = models.CharField(max_length=255, blank=True, null=True)
     phone = models.CharField(max_length=128, blank=True, null=True)
     ice_phone = models.CharField(max_length=128, blank=True, null=True)
     ice_name = models.CharField(max_length=256, blank=True, null=True)

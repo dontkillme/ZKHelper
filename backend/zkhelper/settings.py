@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django_filters',
     'apps.event',
     'apps.bar',
+    'apps.logistic',
     'generic',
 ]
 

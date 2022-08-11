@@ -9,11 +9,11 @@
 			required: true,
 		},
 	});
-	const emit = defineEmits(['update:modelValue'])
+	const emit = defineEmits(['update:modelValue']);
 
 	const dialogState = computed({
 		get: () => props.modelValue,
-		set: (dialogState) => emit('update:modelValue', dialogState)
+		set: (dialogState) => emit('update:modelValue', dialogState),
 	});
 
 	const amount = ref(10);
@@ -27,17 +27,14 @@
 
 		try {
 			await addCredits(amount.value);
-		}
-		catch (error) {
+		} catch (error) {
 			$q.notify({
 				type: 'negative',
 				caption: error.message.replace(/\n/, '<br>'),
 				html: true,
 				message: 'Błąd wpłacania środków!',
-				actions: [
-					{icon: 'close', color: 'white'}
-				]
-			})
+				actions: [{ icon: 'close', color: 'white' }],
+			});
 
 			sending.value = false;
 			return;
@@ -47,10 +44,8 @@
 			type: 'positive',
 			caption: 'Kwota wpłacona na rachunek.',
 			message: 'Sukces!',
-			actions: [
-				{icon: 'close', color: 'white'}
-			]
-		})
+			actions: [{ icon: 'close', color: 'white' }],
+		});
 
 		await fetchAccountBasicInfo();
 
@@ -82,7 +77,9 @@
 						autofocus
 						lazy-rules
 						:rules="[
-							val => val !== null && val !== '' && !isNaN(val) || 'Podaj poprawną kwotę',
+							(val) =>
+								(val !== null && val !== '' && !isNaN(val)) ||
+								'Podaj poprawną kwotę',
 						]"
 					/>
 				</q-card-section>

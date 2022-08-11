@@ -14,11 +14,7 @@
 
 <template>
 	<div v-if="loading" class="col-auto row q-pa-md q-col-gutter-md">
-		<div
-			class="col-6 col-sm-3 col-lg-2"
-			v-for="n in 10"
-			:key="n"
-		>
+		<div class="col-6 col-sm-3 col-lg-2" v-for="n in 10" :key="n">
 			<q-responsive :ratio="1">
 				<q-skeleton
 					type="QBtn"
@@ -29,20 +25,35 @@
 			</q-responsive>
 		</div>
 	</div>
-	<div v-if="!loading && !error && filteredItems.length" class="col-auto row q-pa-md q-col-gutter-md">
-		<div v-for="item in filteredItems" :key="item.id" class="col-6 col-sm-3 col-lg-2">
+	<div
+		v-if="!loading && !error && filteredItems.length"
+		class="col-auto row q-pa-md q-col-gutter-md"
+	>
+		<div
+			v-for="item in filteredItems"
+			:key="item.id"
+			class="col-6 col-sm-3 col-lg-2"
+		>
 			<q-responsive :ratio="1">
 				<q-btn
 					outline
 					no-caps
-					:class="{'bar-item': true, 'unavailable': !item.available, 'in-order': orderItemCatalog[item.id]}"
+					:class="{
+						'bar-item': true,
+						unavailable: !item.available,
+						'in-order': orderItemCatalog[item.id],
+					}"
 					:disable="!item.available"
 					@click="addItemQuantityToOrder(item.id)"
 				>
 					<div class="col">
 						<div v-if="!item.available">(Niedostępne)</div>
 						<div>{{ item.name }}</div>
-						<div><span v-if="orderItemCatalog[item.id]">{{ orderItemCatalog[item.id] }} x </span>{{ $currency(getItemPrice(item)) }}</div>
+						<div>
+							<span v-if="orderItemCatalog[item.id]"
+								>{{ orderItemCatalog[item.id] }} x </span
+							>{{ $currency(getItemPrice(item)) }}
+						</div>
 					</div>
 				</q-btn>
 			</q-responsive>

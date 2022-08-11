@@ -17,8 +17,8 @@ function resetState(state: RootState) {
 	state.token = null;
 }
 
-export const useBarAuthStore = defineStore({
-	id: 'BarAuth',
+export const useAuthStore = defineStore({
+	id: 'Auth',
 	state: () =>
 		({
 			participantId: null,
@@ -62,6 +62,6 @@ export const useBarAuthStore = defineStore({
 		},
 		hasPermission(group: string) {
 			return this.groups?.includes(group);
-		}
+		},
 	},
 });

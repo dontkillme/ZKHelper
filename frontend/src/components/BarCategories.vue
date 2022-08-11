@@ -3,7 +3,9 @@
 	import { useBarItemCategoriesStore } from 'stores/BarItemCategories';
 	import { computed } from 'vue';
 
-	const { categories, loading, error, selectedCategoryId } = storeToRefs(useBarItemCategoriesStore());
+	const { categories, loading, error, selectedCategoryId } = storeToRefs(
+		useBarItemCategoriesStore()
+	);
 	const { fetchBarItemCategories } = useBarItemCategoriesStore();
 
 	const options = computed(() => {

@@ -38,25 +38,36 @@ export const useBarItemsStore = defineStore({
 		} as RootState),
 	getters: {
 		itemCatalog(state) {
-			return state.items.reduce((acc: { [key: number]: BarItem }, element: BarItem) => {
-				acc[element.id] = element;
-				return acc;
-			}, {});
+			return state.items.reduce(
+				(acc: { [key: number]: BarItem }, element: BarItem) => {
+					acc[element.id] = element;
+					return acc;
+				},
+				{}
+			);
 		},
 		filteredItems(state): BarItem[] {
 			const { selectedCategoryId } = useBarItemCategoriesStore();
 			let items = state.items;
 
 			if (selectedCategoryId !== null) {
-				items = items.filter((element) => element.categoryId == selectedCategoryId);
-			};
+				items = items.filter(
+					(element) => element.categoryId == selectedCategoryId
+				);
+			}
 
 			if (state.searchFilter) {
-				const words = removeAccents(state.searchFilter).toLowerCase().split(' ');
+				const words = removeAccents(state.searchFilter)
+					.toLowerCase()
+					.split(' ');
 				items = items.filter((element) => {
-					const normalizedName = removeAccents(element.name).toLowerCase();
-					return words.every((word) => normalizedName.indexOf(word) !== -1);
-				})
+					const normalizedName = removeAccents(
+						element.name
+					).toLowerCase();
+					return words.every(
+						(word) => normalizedName.indexOf(word) !== -1
+					);
+				});
 			}
 
 			return items;
@@ -64,8 +75,9 @@ export const useBarItemsStore = defineStore({
 		getItemPrice() {
 			const { orderStaffPrices } = storeToRefs(useBarReceiptsStore());
 
-			return (item: BarItem) => orderStaffPrices.value ? item.staffPrice : item.price;
-		}
+			return (item: BarItem) =>
+				orderStaffPrices.value ? item.staffPrice : item.price;
+		},
 	},
 	actions: {
 		async fetchBarItems() {
@@ -75,15 +87,17 @@ export const useBarItemsStore = defineStore({
 			try {
 				const { data } = await api.get<ApiResponse>('/bar/item/');
 
-				this.items = data.map((v) => ({
-					id: v.id,
-					name: v.name,
-					price: parseFloat(v.price),
-					staffPrice: parseFloat(v.staff_price),
-					categoryId: v.category_id,
-					modifyDate: v.modify_date,
-					available: v.available,
-				})).sort((a, b) => a.name < b.name ? -1 : 1);
+				this.items = data
+					.map((v) => ({
+						id: v.id,
+						name: v.name,
+						price: parseFloat(v.price),
+						staffPrice: parseFloat(v.staff_price),
+						categoryId: v.category_id,
+						modifyDate: v.modify_date,
+						available: v.available,
+					}))
+					.sort((a, b) => (a.name < b.name ? -1 : 1));
 			} catch (error) {
 				resetState(this);
 				this.error = error.message;

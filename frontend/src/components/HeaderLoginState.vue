@@ -1,9 +1,9 @@
 <script setup lang="ts">
 	import { storeToRefs } from 'pinia/dist/pinia';
-	import { useBarAuthStore } from '../stores/BarAuth';
+	import { useAuthStore } from 'stores/AuthStore';
 
-	const { participantNick, isAuthenticated } = storeToRefs(useBarAuthStore());
-	const { logout } = useBarAuthStore();
+	const { participantNick, isAuthenticated } = storeToRefs(useAuthStore());
+	const { logout } = useAuthStore();
 </script>
 
 <template>

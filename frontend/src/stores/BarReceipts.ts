@@ -1,26 +1,32 @@
 import { defineStore } from 'pinia';
 import type { BarAccountBasicInfo } from 'models/bar';
-import { useBarAuthStore } from 'stores/BarAuth';
+import { useAuthStore } from 'stores/AuthStore';
 import api from 'src/api';
 import { useBarItemsStore } from 'stores/BarItems';
 
-type ReceiptHistoryApiResponse = Record<string, {
-	id: number;
-	bar_items: {
+type ReceiptHistoryApiResponse = Record<
+	string,
+	{
 		id: number;
-		item_name: string;
-		quantity: number;
-		price: string;
-	},
-	created_at: string;
-	sum: string;
-}>;
+		bar_items: {
+			id: number;
+			item_name: string;
+			quantity: number;
+			price: string;
+		};
+		created_at: string;
+		sum: string;
+	}
+>;
 
-type SearchParticipantsApiResponse = Record<string, {
-	nick: string;
-	baraccount: number;
-	id: number;
-}>;
+type SearchParticipantsApiResponse = Record<
+	string,
+	{
+		nick: string;
+		baraccount: number;
+		id: number;
+	}
+>;
 
 type BasicInfoApiResponse = {
 	balance: string;
@@ -30,7 +36,7 @@ type BasicInfoApiResponse = {
 };
 
 type RootState = {
-	orderAccount: { label: string, value: number } | null;
+	orderAccount: { label: string; value: number } | null;
 	orderItems: {
 		itemId: number;
 		quantity: number;
@@ -93,13 +99,21 @@ export const useBarReceiptsStore = defineStore({
 			return 0 < Object.keys(state.orderItems).length;
 		},
 		orderItemCatalog(state) {
-			return Object.fromEntries(state.orderItems.map((orderItem) => [orderItem.itemId, orderItem.quantity]));
+			return Object.fromEntries(
+				state.orderItems.map((orderItem) => [
+					orderItem.itemId,
+					orderItem.quantity,
+				])
+			);
 		},
 		orderTotal(state) {
 			const { itemCatalog, getItemPrice } = useBarItemsStore();
 
 			return state.orderItems.reduce(
-				(acc, element) => acc + getItemPrice(itemCatalog[element.itemId]) * element.quantity,
+				(acc, element) =>
+					acc +
+					getItemPrice(itemCatalog[element.itemId]) *
+						element.quantity,
 				0
 			);
 		},
@@ -110,7 +124,9 @@ export const useBarReceiptsStore = defineStore({
 			resetBasicInfoState(this);
 		},
 		addItemQuantityToOrder(barItemId: number) {
-			const orderItemIndex = this.orderItems.findIndex((element) => element.itemId === barItemId);
+			const orderItemIndex = this.orderItems.findIndex(
+				(element) => element.itemId === barItemId
+			);
 			if (orderItemIndex === -1) {
 				this.orderItems.push({
 					itemId: barItemId,
@@ -121,7 +137,9 @@ export const useBarReceiptsStore = defineStore({
 			}
 		},
 		takeItemQuantityToOrder(barItemId: number) {
-			const orderItemIndex = this.orderItems.findIndex((element) => element.itemId === barItemId);
+			const orderItemIndex = this.orderItems.findIndex(
+				(element) => element.itemId === barItemId
+			);
 			if (orderItemIndex !== -1) {
 				this.orderItems[orderItemIndex].quantity -= 1;
 
@@ -134,7 +152,9 @@ export const useBarReceiptsStore = defineStore({
 			this.receiptHistoryListLoading = true;
 
 			try {
-				const { data } = await api.get<ReceiptHistoryApiResponse>(`/bar/receipt/?account=${this.orderAccount?.value}`);
+				const { data } = await api.get<ReceiptHistoryApiResponse>(
+					`/bar/receipt/?account=${this.orderAccount?.value}`
+				);
 
 				this.receiptHistoryList = data.map((v) => ({
 					id: v.id,
@@ -145,7 +165,7 @@ export const useBarReceiptsStore = defineStore({
 						name: i.item_name,
 						quantity: i.quantity,
 						price: parseFloat(i.price),
-					}))
+					})),
 				}));
 			} catch (error) {
 				this.receiptHistoryList = [];
@@ -157,7 +177,9 @@ export const useBarReceiptsStore = defineStore({
 			this.accountListLoading = true;
 
 			try {
-				const { data } = await api.get<SearchParticipantsApiResponse>(`/bar/search/?search=${searchValue}`);
+				const { data } = await api.get<SearchParticipantsApiResponse>(
+					`/bar/search/?search=${searchValue}`
+				);
 
 				this.accountList = data.map((v) => ({
 					label: `${v.nick} (#${v.id})`,
@@ -182,7 +204,9 @@ export const useBarReceiptsStore = defineStore({
 			this.basicInfoError = null;
 
 			try {
-				const { data } = await api.get<BasicInfoApiResponse>(`/bar/account_basics/${this.orderAccount?.value}/`);
+				const { data } = await api.get<BasicInfoApiResponse>(
+					`/bar/account_basics/${this.orderAccount?.value}/`
+				);
 
 				this.basicInfo = {
 					balance: parseFloat(data.balance),
@@ -206,7 +230,7 @@ export const useBarReceiptsStore = defineStore({
 			});
 		},
 		async createBarReceipt() {
-			const { participantId } = useBarAuthStore();
+			const { participantId } = useAuthStore();
 
 			await api.post('/bar/receipt/', {
 				account: this.orderAccount?.value,

@@ -1,17 +1,12 @@
 {
-  "params": {
-    "skipTrim": false,
-    "icon": "src\\assets\\zakon_logo.png",
-    "themeColor": "212121",
-    "svgColor": "000",
-    "splashscreenIconRatio": "80",
-    "padding": [
-      0,
-      0
-    ],
-    "include": [
-      "pwa"
-    ]
-  },
-  "assets": []
+	"params": {
+		"skipTrim": false,
+		"icon": "src\\assets\\zakon_logo.png",
+		"themeColor": "212121",
+		"svgColor": "000",
+		"splashscreenIconRatio": "80",
+		"padding": [0, 0],
+		"include": ["pwa"]
+	},
+	"assets": []
 }

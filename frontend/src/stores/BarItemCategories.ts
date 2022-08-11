@@ -30,10 +30,16 @@ export const useBarItemCategoriesStore = defineStore({
 		} as RootState),
 	getters: {
 		categoryCatalog(state) {
-			return state.categories.reduce((acc: { [key: number]: BarItemCategory }, element: BarItemCategory) => {
-				acc[element.id] = element;
-				return acc;
-			}, {});
+			return state.categories.reduce(
+				(
+					acc: { [key: number]: BarItemCategory },
+					element: BarItemCategory
+				) => {
+					acc[element.id] = element;
+					return acc;
+				},
+				{}
+			);
 		},
 	},
 	actions: {
@@ -42,7 +48,9 @@ export const useBarItemCategoriesStore = defineStore({
 			this.error = null;
 
 			try {
-				const { data } = await api.get<ApiResponse>('/bar/item_category/');
+				const { data } = await api.get<ApiResponse>(
+					'/bar/item_category/'
+				);
 
 				this.categories = data.map((v) => ({
 					id: v.id,

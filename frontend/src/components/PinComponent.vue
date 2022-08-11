@@ -1,11 +1,14 @@
 <script setup lang="ts">
-	import { useBarAuthStore } from 'stores/BarAuth';
+	import { useAuthStore } from 'stores/AuthStore';
 	import { ref } from 'vue';
 	import { useQuasar } from 'quasar';
 
-	const { login } = useBarAuthStore();
+	const { login } = useAuthStore();
 	const $q = useQuasar();
 
+	const props = defineProps({
+		label: String,
+	});
 	const pin = ref<string | null>(null);
 	const sending = ref(false);
 
@@ -14,15 +17,12 @@
 
 		try {
 			await login(Number(pin.value));
-		}
-		catch (error) {
+		} catch (error) {
 			$q.notify({
 				type: 'negative',
 				caption: error.message,
 				message: 'Błąd logowania!',
-				actions: [
-					{icon: 'close', color: 'white'}
-				]
+				actions: [{ icon: 'close', color: 'white' }],
 			});
 		}
 
@@ -33,7 +33,7 @@
 <template>
 	<q-form
 		class="col column no-wrap flex-center text-center q-gutter-y-md q-mx-md q-pt-xl"
-		style="height: 100%;"
+		style="height: 100%"
 		autocorrect="off"
 		autocapitalize="off"
 		autocomplete="off"
@@ -42,7 +42,7 @@
 	>
 		<q-icon name="lock" size="5rem" color="gray-5" />
 		<div class="text-h4">Podaj PIN</div>
-		<div class="text-secondary q-mb-lg">Obsługa baru potrzebuje użyć osobistego PINu, by móc składać zamówienia.</div>
+		<div class="text-secondary q-mb-lg">{{ props.label }}</div>
 		<div class="row full-width justify-center">
 			<q-input
 				v-model="pin"
@@ -56,7 +56,9 @@
 				input-class="text-center"
 				inputmode="numeric"
 				class="col-12 col-sm-6 col-md-4"
-				:rules="[ val => val && 0 < val.length || 'Pin jest wymagany!' ]"
+				:rules="[
+					(val) => (val && 0 < val.length) || 'Pin jest wymagany!',
+				]"
 			>
 				<template #prepend>
 					<q-icon name="lock" />

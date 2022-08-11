@@ -4,7 +4,7 @@
 	import { computed, ref } from 'vue';
 	import BarReceiptHistoryDialog from 'components/BarReceiptHistoryDialog.vue';
 	import BarAddCreditsDialog from 'components/BarAddCreditsDialog.vue';
-	import { useBarAuthStore } from 'stores/BarAuth';
+	import { useAuthStore } from 'stores/AuthStore';
 
 	const {
 		orderAccount,
@@ -13,12 +13,13 @@
 		basicInfoError,
 		accountList,
 	} = storeToRefs(useBarReceiptsStore());
-	const { fetchAccountBasicInfo, fetchFilteredAccountList } = useBarReceiptsStore();
-	const { hasPermission } = useBarAuthStore();
+	const { fetchAccountBasicInfo, fetchFilteredAccountList } =
+		useBarReceiptsStore();
+	const { hasPermission } = useAuthStore();
 
 	const options = ref([]);
 	const receiptHistoryDialog = ref(false);
-	const addCreaditsDialog = ref(false);
+	const addCreditsDialog = ref(false);
 	const isAllowed = computed(() => hasPermission('logistyka'));
 
 	async function fetchAccountListFilter(val, update, abort) {
@@ -31,7 +32,7 @@
 
 		update(() => {
 			options.value = accountList.value;
-		})
+		});
 	}
 </script>
 
@@ -55,7 +56,10 @@
 		@update:model-value="fetchAccountBasicInfo"
 		input-debounce="500"
 		class="q-mx-md q-mt-md"
-		:class="{'q-mb-md': !basicInfoError  && !basicInfo, 'q-mb-sm': !!basicInfoError}"
+		:class="{
+			'q-mb-md': !basicInfoError && !basicInfo,
+			'q-mb-sm': !!basicInfoError,
+		}"
 		:error="!!basicInfoError"
 	>
 		<template #prepend>
@@ -71,14 +75,27 @@
 	</q-select>
 	<div v-if="basicInfoError" class="text-center q-mb-sm text-red">
 		<div>Uczestnik nie ma otwartego rachunku!</div>
-		<q-btn v-if="isAllowed" text-color="grey-5" @click="addCreaditsDialog = true">Otwórz rachunek</q-btn>
-		<div v-else class="text-center q-my-sm text-red">Nie masz uprawnień do otwarcia rachunku!</div>
+		<q-btn
+			v-if="isAllowed"
+			text-color="grey-5"
+			@click="addCreditsDialog = true"
+			>Otwórz rachunek</q-btn
+		>
+		<div v-else class="text-center q-my-sm text-red">
+			Nie masz uprawnień do otwarcia rachunku!
+		</div>
 	</div>
 	<div v-if="basicInfo" class="row text-center">
-		<div class="col row flex-center" style="height: 100%;">
-			<div class="col-12 col-sm-7">Stan rachunku: {{ $currency(basicInfo.balance) }} / {{ $currency(basicInfo.credits) }}</div>
-			<q-separator vertical inset class="gt-xs"/>
-			<div class="col-12 col-sm">Ceny obsługi: <q-icon :name="basicInfo.isStaff ? 'check_circle' : 'clear'" /></div>
+		<div class="col row flex-center" style="height: 100%">
+			<div class="col-12 col-sm-7">
+				Stan rachunku: {{ $currency(basicInfo.balance) }} /
+				{{ $currency(basicInfo.credits) }}
+			</div>
+			<q-separator vertical inset class="gt-xs" />
+			<div class="col-12 col-sm">
+				Ceny obsługi:
+				<q-icon :name="basicInfo.isStaff ? 'check_circle' : 'clear'" />
+			</div>
 		</div>
 		<q-separator vertical inset />
 		<div class="col-auto q-pa-sm">
@@ -95,6 +112,9 @@
 	</div>
 	<q-separator />
 
-	<BarReceiptHistoryDialog v-model="receiptHistoryDialog" @add-credits-dialog-request="addCreaditsDialog = true"/>
-	<BarAddCreditsDialog v-model="addCreaditsDialog" />
+	<BarReceiptHistoryDialog
+		v-model="receiptHistoryDialog"
+		@add-credits-dialog-request="addCreditsDialog = true"
+	/>
+	<BarAddCreditsDialog v-model="addCreditsDialog" />
 </template>

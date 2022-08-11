@@ -1,19 +1,19 @@
 import axios from 'axios';
-import { useBarAuthStore } from 'stores/BarAuth';
+import { useAuthStore } from 'stores/AuthStore';
 
 const axiosClient = axios.create({
 	baseURL: process.env.API_URL,
 	headers: {
 		'Content-Type': 'application/json',
 		'Cache-Control': 'no-cache',
-		'Pragma': 'no-cache',
+		Pragma: 'no-cache',
 	},
 });
 
 // let requestCount = 0;
 
 axiosClient.interceptors.request.use((config) => {
-	const { token } = useBarAuthStore();
+	const { token } = useAuthStore();
 
 	if (!config.headers) {
 		config.headers = {};
@@ -37,7 +37,11 @@ axiosClient.interceptors.response.use(
 							break;
 						case 400:
 							message = Object.entries(error.response.data)
-								.map(([fieldName, fieldErrors]) => `${fieldName}:\n- ` + fieldErrors.join('\n- '))
+								.map(
+									([fieldName, fieldErrors]) =>
+										`${fieldName}:\n- ` +
+										fieldErrors.join('\n- ')
+								)
 								.join('\n');
 							break;
 						default:

@@ -2,23 +2,29 @@ import { defineStore } from 'pinia';
 import type { BarAccountBasicInfo } from 'models/bar';
 import api from 'src/api';
 
-type ReceiptHistoryApiResponse = Record<string, {
-	id: number;
-	bar_items: {
+type ReceiptHistoryApiResponse = Record<
+	string,
+	{
 		id: number;
-		item_name: string;
-		quantity: number;
-		price: string;
-	},
-	created_at: string;
-	sum: string;
-}>;
+		bar_items: {
+			id: number;
+			item_name: string;
+			quantity: number;
+			price: string;
+		};
+		created_at: string;
+		sum: string;
+	}
+>;
 
-type SearchParticipantsApiResponse = Record<string, {
-	nick: string;
-	baraccount: number;
-	id: number;
-}>;
+type SearchParticipantsApiResponse = Record<
+	string,
+	{
+		nick: string;
+		baraccount: number;
+		id: number;
+	}
+>;
 
 type BasicInfoApiResponse = {
 	balance: string;
@@ -74,7 +80,9 @@ export const useBarReceiptsStore = defineStore({
 			this.receiptHistoryListLoading = true;
 
 			try {
-				const { data } = await api.get<ReceiptHistoryApiResponse>(`/bar/receipt/?account=${this.orderAccount?.value}`);
+				const { data } = await api.get<ReceiptHistoryApiResponse>(
+					`/bar/receipt/?account=${this.orderAccount?.value}`
+				);
 
 				this.receiptHistoryList = data.map((v) => ({
 					id: v.id,
@@ -85,7 +93,7 @@ export const useBarReceiptsStore = defineStore({
 						name: i.item_name,
 						quantity: i.quantity,
 						price: parseFloat(i.price),
-					}))
+					})),
 				}));
 			} catch (error) {
 				this.receiptHistoryList = [];
@@ -97,7 +105,9 @@ export const useBarReceiptsStore = defineStore({
 			this.accountListLoading = true;
 
 			try {
-				const { data } = await api.get<SearchParticipantsApiResponse>(`/bar/search/?search=${searchValue}`);
+				const { data } = await api.get<SearchParticipantsApiResponse>(
+					`/bar/search/?search=${searchValue}`
+				);
 
 				this.accountList = data.map((v) => ({
 					label: `${v.nick} (#${v.id})`,
@@ -122,7 +132,9 @@ export const useBarReceiptsStore = defineStore({
 			this.basicInfoError = null;
 
 			try {
-				const { data } = await api.get<BasicInfoApiResponse>(`/bar/account_basics/${this.orderAccount?.value}/`);
+				const { data } = await api.get<BasicInfoApiResponse>(
+					`/bar/account_basics/${this.orderAccount?.value}/`
+				);
 
 				this.basicInfo = {
 					balance: parseFloat(data.balance),

@@ -1,0 +1,13 @@
+ul.participant-list {
+    list-style-type: none;
+    padding-inline: 0px;
+    border: 1px solid black;
+    padding: 10px;
+
+}
+
+ul.participant-list li:hover {
+    background: #e0fbff;
+    cursor: pointer;
+    padding: 5px;
+}

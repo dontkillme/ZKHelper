@@ -1,0 +1,22 @@
+<html>
+<body>
+<table>
+    <thead>
+        <tr>
+            <th>Nazwa</th>
+            <th>Wprowadzono</th>
+            <th>Zeszlo</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for item in count %}
+        <tr>
+            <td>{{item.name}}</td>
+            <td>{{item.magazine}}</td>
+            <td>{{item.sell}}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</body>
+</html>

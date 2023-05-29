@@ -1,0 +1,16 @@
+{% load static %}
+<html>
+<head>
+    <link rel='stylesheet' href='{% static "main.css" %}'>
+</head>
+<body>
+<div class="pinbox">
+    <form method="post" action="/basic/login/">
+        {% csrf_token %}
+    <label for="pin">pin:</label>
+    <input type="password" id="pin" name="pin"><br>
+    <input type="submit">
+    </form>
+</div>
+</body>
+</html>

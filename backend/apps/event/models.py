@@ -28,7 +28,7 @@ class Quest(models.Model):
     reward = models.IntegerField(default=10)
 
     def __str__(self):
-        return self.name
+        return self.id + " " + self.name + " " + self.reward
 
 
 class ParticipantQuests(models.Model):

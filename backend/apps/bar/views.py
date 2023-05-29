@@ -3,6 +3,10 @@ from apps.event.models import EventParticipant
 from rest_framework import viewsets, response
 from django.http import Http404
 from generic.views import set_user_by_token
+from django.views.decorators.http import require_http_methods
+from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import render
+from apps.bar.models import BarItem, BarReceiptItem, BarAccount
 
 CHAR_MAP = {
     "a": "[aą]",
@@ -61,3 +65,40 @@ class BarFullAccountView(BarAccountRetrieverMixin, viewsets.ModelViewSet):
 
 class BarAccountView(BarAccountRetrieverMixin, viewsets.ReadOnlyModelViewSet):
     pass
+
+
+@require_http_methods(["GET",])
+@csrf_exempt
+def show_final_results(request):
+    data = {"items": BarItem.objects.all(),
+            "accounts": [],
+            "total": 0}
+    bar_accounts = BarAccount.objects.all()
+    items_ids = [i.id for i in data["items"]]
+    items_ids.sort()
+    for acc in bar_accounts:
+        tmp = {
+                 "id": acc.participant.id,
+                 "name": acc.participant.name,
+                 "surname": acc.participant.surname,
+                 "nick": acc.participant.nick,
+                 "items": {k: 0 for k in items_ids},
+                 "inbound": float(acc.credits) if acc.credits != 1 else 0,
+                 "outbound": 0,
+                 "recalc": 0,
+                 "staff": acc.participant.is_staff
+               }
+        for receipt in acc.receipts.all():
+            for item in receipt.bar_items.all():
+                tmp["items"][item.item.id] += item.quantity
+                if acc.participant.is_staff:
+                    tmp["outbound"] += item.item.staff_price * item.quantity
+                else:
+                    tmp["outbound"] += item.item.price * item.quantity
+        tmp["items"] = sorted(tmp["items"].items())
+        tmp["recalc"] = tmp["inbound"] - float(tmp["outbound"])
+        if tmp["recalc"] != 0:
+            data["accounts"].append(tmp)
+            data["total"] += tmp["recalc"]
+    return render(request, "recalc.html", data)
+

@@ -2,7 +2,7 @@ import json
 from django.shortcuts import render
 from django.http import JsonResponse
 from apps.logistic.models import MagazineItem
-from apps.bar.models import BarReceiptItem, BarItem
+from apps.bar.models import BarReceiptItem, BarItem, BarReceipt
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
 from generic.views import set_user_by_token
@@ -33,3 +33,17 @@ def current_magazine_states(request):
         count[item[0]]["sell"] += item[2]
 
     return render(request, "logi.html", {"count": count.values()})
+
+
+@require_http_methods(["GET",])
+@csrf_exempt
+def current_sum_state(request):
+    if not request.user.is_authenticated:
+        error = set_user_by_token(request)
+        if error:
+            return error
+    if not request.user.has_perms(['bar.add_baraccount']):
+        return JsonResponse({"error": "missing permission"}, status=401, safe=False)
+
+    item_sum = list(BarReceipt.objects.all().values_list("sum", flat=True))
+    return JsonResponse({"sum": sum(item_sum)}, safe=False)

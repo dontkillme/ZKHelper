@@ -33,6 +33,7 @@ type BasicInfoApiResponse = {
 	is_staff: boolean;
 	credits: string;
 	nick: string;
+  state: number;
 };
 
 type RootState = {
@@ -213,6 +214,7 @@ export const useBarReceiptsStore = defineStore({
 					isStaff: data.is_staff,
 					credits: parseFloat(data.credits),
 					nick: data.nick,
+          state: data.state,
 				};
 
 				this.orderStaffPrices = this.basicInfo.isStaff;
@@ -223,24 +225,36 @@ export const useBarReceiptsStore = defineStore({
 
 			this.basicInfoLoading = false;
 		},
-		async addCredits(creditValue: number) {
+		async addCredits(creditValue: number, inferring: number) {
 			await api.post('bar/bar_account/', {
 				participant_id: this.orderAccount?.value,
+        inferring: inferring,
 				credits: creditValue,
 			});
 		},
-		async createBarReceipt() {
+    async changeAccountState(action: string, userId: number) {
+      await api.post('bar/change_state/', {
+				participant_id: this.orderAccount?.value,
+				action: action,
+        user_id: userId
+			});
+    },
+		async createBarReceipt(noAccount=false) {
 			const { participantId } = useAuthStore();
-
-			await api.post('/bar/receipt/', {
-				account: this.orderAccount?.value,
+      const data = {
 				seller: participantId,
 				price_mode: Number(this.orderStaffPrices),
 				items: this.orderItems.map((v) => ({
 					item_id: v.itemId,
 					quantity: v.quantity,
 				})),
-			});
+			}
+
+      if (this.orderAccount && !noAccount) {
+        data['account'] = this.orderAccount?.value
+      }
+
+			await api.post('/bar/receipt/', data);
 
 			resetOrderState(this);
 			resetBasicInfoState(this);

@@ -17,6 +17,7 @@
 	});
 
 	const amount = ref(10);
+  const inferring = ref();
 	const sending = ref(false);
 
 	const { addCredits, fetchAccountBasicInfo } = useBarReceiptsStore();
@@ -26,7 +27,7 @@
 		sending.value = true;
 
 		try {
-			await addCredits(amount.value);
+			await addCredits(amount.value, inferring.value);
 		} catch (error) {
 			$q.notify({
 				type: 'negative',
@@ -72,7 +73,6 @@
 					<q-input
 						v-model="amount"
 						type="number"
-						min="1"
 						dense
 						autofocus
 						lazy-rules
@@ -80,6 +80,19 @@
 							(val) =>
 								(val !== null && val !== '' && !isNaN(val)) ||
 								'Podaj poprawną kwotę',
+						]"
+					/>
+          <q-input
+						v-model="inferring"
+						type="number"
+            label="ID wprowadzającego"
+						dense
+						autofocus
+						lazy-rules
+						:rules="[
+							(val) =>
+								(val !== null && val !== '' && !isNaN(val)) ||
+								'Podaj poprawny ID',
 						]"
 					/>
 				</q-card-section>
@@ -91,7 +104,7 @@
 						label="Wpłać środki"
 						type="submit"
 						:loading="sending"
-						:disable="!amount"
+						:disable="!amount||!inferring"
 					/>
 				</q-card-actions>
 			</q-form>

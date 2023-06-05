@@ -1,10 +1,25 @@
 <script setup lang="ts">
 	import { ref } from 'vue';
+  import { computed } from 'vue';
 	import EmptyComponent from 'components/EmptyComponent.vue';
 	import { storeToRefs } from 'pinia';
 	import { useBarReceiptsStore } from 'stores/BarReceipts';
 	import { useBarItemsStore } from 'stores/BarItems';
 	import { useQuasar } from 'quasar';
+
+  const props = defineProps({
+		payCash: {
+			type: Boolean,
+			required: true,
+		},
+	});
+
+	const emit = defineEmits(['update:payCash']);
+
+	const payCashState = computed({
+		get: () => props.payCash,
+		set: (payCashState) => emit('update:payCash', payCashState),
+	});
 
 	const {
 		orderItems,
@@ -28,7 +43,7 @@
 		sending.value = true;
 
 		try {
-			await createBarReceipt();
+			await createBarReceipt(payCashState);
 		} catch (error) {
 			$q.notify({
 				type: 'negative',
@@ -72,71 +87,25 @@
 		</q-item-label>
 	</q-list>
 	<q-separator />
-	<EmptyComponent
-		v-if="!hasAnyItemsInOrder"
-		icon="shopping_cart"
-		primary="Brak produktów!"
-		secondary="Dodaj produkty klikając na kafelki obok."
-		class="q-my-md gt-sm"
-	/>
-	<EmptyComponent
-		v-if="!hasAnyItemsInOrder"
-		icon="shopping_cart"
-		primary="Brak produktów!"
-		secondary="Dodaj produkty klikając na kafelki powyżej."
-		class="q-my-md lt-md"
-	/>
-	<q-scroll-area
-		v-if="hasAnyItemsInOrder"
-		visible
-		class="col"
-		style="min-height: 18rem"
-	>
-		<q-list separator>
-			<q-item v-for="orderItem in orderItems" :key="orderItem.itemId">
-				<q-item-section class="col-auto">{{
-					orderItem.quantity
-				}}</q-item-section>
-				<q-item-section class="col-auto">x</q-item-section>
-				<q-item-section no-wrap>{{
-					itemCatalog[orderItem.itemId].name
-				}}</q-item-section>
-				<q-item-section no-wrap class="text-secondary col-auto"
-					>{{ orderItem.quantity }} x
-					{{ $currency(getItemPrice(itemCatalog[orderItem.itemId])) }}
-					=
-				</q-item-section>
-				<q-item-section class="col-auto">{{
-					$currency(
-						getItemPrice(itemCatalog[orderItem.itemId]) *
-							orderItem.quantity
-					)
-				}}</q-item-section>
-				<q-item-section side>
-					<div class="text-grey-5 q-gutter-xs">
-						<q-btn
-							size="1.25rem"
-							flat
-							dense
-							round
-							icon="remove"
-							@click="takeItemQuantityToOrder(orderItem.itemId)"
-						/>
-						<q-btn
-							size="1.25rem"
-							flat
-							dense
-							round
-							icon="add"
-							@click="addItemQuantityToOrder(orderItem.itemId)"
-						/>
-					</div>
-				</q-item-section>
-			</q-item>
-			<q-separator />
-		</q-list>
-	</q-scroll-area>
-	<div class="col-auto">
+  <q-scroll-area v-if="hasAnyItemsInOrder" visible class="col" style="min-height: 18rem; height: 18rem;">
+    <q-list separator>
+      <q-item v-for="orderItem in orderItems" :key="orderItem.itemId">
+        <q-item-section class="col-auto">{{orderItem.quantity}}</q-item-section>
+        <q-item-section class="col-auto">x</q-item-section>
+        <q-item-section no-wrap>{{itemCatalog[orderItem.itemId].name}}</q-item-section>
+        <q-item-section no-wrap class="text-secondary col-auto">{{ orderItem.quantity }} x {{ $currency(getItemPrice(itemCatalog[orderItem.itemId])) }}	=	</q-item-section>
+        <q-item-section class="col-auto">{{$currency(getItemPrice(itemCatalog[orderItem.itemId]) * orderItem.quantity)}}</q-item-section>
+        <q-item-section side>
+          <div class="text-grey-5 q-gutter-xs">
+            <q-btn size="1.25rem"	flat dense round icon="remove" @click="takeItemQuantityToOrder(orderItem.itemId)"	/>
+            <q-btn size="1.25rem"	flat dense round icon="add"	@click="addItemQuantityToOrder(orderItem.itemId)"	/>
+          </div>
+        </q-item-section>
+      </q-item>
+      <q-separator />
+    </q-list>
+  </q-scroll-area>
+  <div class="col-auto">
 		<q-btn
 			v-if="hasAnyItemsInOrder"
 			color="primary"
@@ -144,13 +113,17 @@
 			class="full-width"
 			@click="onSubmit"
 			:loading="sending"
+      :disabled="!payCashState&&basicInfo?.state!=1"
 		>
-			<template v-if="basicInfo">
+			<template v-if="basicInfo?.state&&!payCashState">
 				Zamów za {{ $currency(orderTotal) }} na rachunek
 			</template>
-			<template v-else>
+			<template v-if="payCashState">
 				Zamów za {{ $currency(orderTotal) }} w gotówce
 			</template>
+      <template v-if="!payCashState&&basicInfo?.state!=1">
+        Wybierz sposób płatności
+      </template>
 		</q-btn>
 	</div>
 </template>

@@ -96,8 +96,13 @@ export const useBarItemsStore = defineStore({
 						categoryId: v.category_id,
 						modifyDate: v.modify_date,
 						available: v.available,
+            position: v.position
 					}))
-					.sort((a, b) => (a.name < b.name ? -1 : 1));
+					.sort((a, b) => {
+            if (!a.position && !b.position)
+              return (a.name < b.name ? -1 : 1)
+            return (a.position > b.position ? -1 : 1)
+          });
 			} catch (error) {
 				resetState(this);
 				this.error = error.message;

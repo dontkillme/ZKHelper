@@ -5,12 +5,14 @@
 	import BarReceiptItems from 'components/BarReceiptItems.vue';
 	import BarReceiptAccount from 'components/BarReceiptAccount.vue';
 	import BarItemsSearch from 'components/BarItemsSearch.vue';
+  import BarOrderDialog from 'components/BarOrderDialog.vue';
 
 	import { computed, ref } from 'vue';
 	import { storeToRefs } from 'pinia';
 	import { useAuthStore } from 'stores/AuthStore';
 	import { useBarReceiptsStore } from 'stores/BarReceipts';
 	import EmptyComponent from 'components/EmptyComponent.vue';
+  
 
 	const { hasPermission } = useAuthStore();
 	const { isAuthenticated } = storeToRefs(useAuthStore());
@@ -18,6 +20,7 @@
 	const { clearOrder } = useBarReceiptsStore();
 
 	const orderClearConfirm = ref(false);
+  const showOrderDialog = ref(false);
 	const isAllowed = computed(
 		() => hasPermission('bar') || hasPermission('logistyka')
 	);
@@ -42,43 +45,47 @@
 			class="column"
 			style="height: 100%"
 		>
+    <q-page-container>
 			<div class="col-12 row">
-				<div class="col-12 col-md-6">
-					<div>
-						<BarCategories />
-						<BarItemsSearch />
+				<div class="col-12 col-md-6">					
+          <div>
+            <q-page-sticky position="top" style="zIndex: 100; background:#121212; paddingTop:1rem; paddingBottom:1rem;">
+              <div class="row" >
+                <div class="col-auto">
+                  <q-btn
+                    color="primary"
+                    size="lg"
+                    @click="showOrderDialog=true"
+                    :disabled="!hasAnyItemsInOrder"
+                  >Zamówienie</q-btn>
+                </div>
+                <div class="col-auto">
+                  <q-btn
+                    color="warning"
+                    size="lg"
+                    @click="orderClearConfirm = true"
+                    :disabled="!hasAnyItemsInOrder"
+                  >
+                    Wyczyść zamówienie
+                  </q-btn>
+                </div>
+              </div>
+            </q-page-sticky>
 						<BarItems />
 					</div>
 				</div>
 				<q-separator vertical class="gt-sm" />
 				<div class="col-12 col-md">
 					<div class="column" style="height: 100%">
-						<q-separator class="lt-md" />
-						<q-list separator>
-							<q-item-label header>
-								<div class="row flex-center">
-									<div class="col">Zamówienie</div>
-									<div class="col-auto">
-										<q-btn
-											:class="{
-												invisible: !hasAnyItemsInOrder,
-											}"
-											@click="orderClearConfirm = true"
-										>
-											Wyczyść zamówienie
-										</q-btn>
-									</div>
-								</div>
-							</q-item-label>
-						</q-list>
-						<q-separator />
 						<BarReceiptAccount />
-						<BarReceiptItems />
 					</div>
 				</div>
 			</div>
+    </q-page-container>
 		</div>
 	</q-page>
+
+  <BarOrderDialog v-model="showOrderDialog" />
 
 	<q-dialog v-model="orderClearConfirm">
 		<q-card>

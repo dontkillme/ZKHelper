@@ -31,6 +31,7 @@ type BasicInfoApiResponse = {
 	is_staff: boolean;
 	credits: string;
 	nick: string;
+  state: number;
 };
 
 type RootState = {
@@ -141,6 +142,7 @@ export const useBarReceiptsStore = defineStore({
 					isStaff: data.is_staff,
 					credits: parseFloat(data.credits),
 					nick: data.nick,
+          state: data.state
 				};
 
 				this.orderStaffPrices = this.basicInfo.isStaff;
@@ -157,5 +159,12 @@ export const useBarReceiptsStore = defineStore({
 				credits: creditValue,
 			});
 		},
+    async changeAccountState(action: string, userId: number) {
+      await api.post('bar/change_state/', {
+				participant_id: this.orderAccount?.value,
+				action: action,
+        user_id: userId
+			});
+    }
 	},
 });

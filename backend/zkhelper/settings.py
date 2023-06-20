@@ -144,10 +144,14 @@ STATIC_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'static/')
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+CORS_ALLOW_PRIVATE_NETWORK = True
 CORS_ALLOW_ALL_ORIGINS = True
-CORS_ORIGIN_WHITELIST = [
-    'http://localhost:3000',
-    'http://127.0.0.1:3000'
+# CORS_ORIGIN_WHITELIST = [
+#     'http://localhost:9000',
+#     'http://192.168.1.64:9000'
+# ]
+CORS_ALLOW_HEADERS = [
+    "*"
 ]
 
 REST_FRAMEWORK = {

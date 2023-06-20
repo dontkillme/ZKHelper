@@ -17,6 +17,7 @@ class BarItem(models.Model):
     category = models.ForeignKey(BarItemCategory, on_delete=models.PROTECT)
     modify_date = models.DateTimeField(auto_now=True)
     available = models.BooleanField(default=True)
+    position = models.IntegerField(default=0)
 
     def __str__(self):
         return "[{}] {}".format(self.id, self.name)
@@ -34,13 +35,27 @@ class BarReceiptItem(models.Model):
 
 
 class BarAccount(models.Model):
+
+    STATE_NOT_CREATED = 0
+    STATE_ACTIVE = 1
+    STATE_CLOSED = 2
+
     participant = models.OneToOneField(EventParticipant, on_delete=models.DO_NOTHING, primary_key=True)
     credits = models.DecimalField(max_digits=6, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
+    state = models.IntegerField(default=STATE_NOT_CREATED)
     history = HistoricalRecords()
 
     def __str__(self):
         return "[{}] {} {} {}".format(self.participant.id, self.participant.name, self.participant.surname, self.participant.nick)
+
+
+class BarAccountLog(models.Model):
+    bar_account = models.ForeignKey(BarAccount, on_delete=models.DO_NOTHING)
+    change_by = models.ForeignKey(EventParticipant, on_delete=models.DO_NOTHING)
+    value = models.TextField()
+    action = models.TextField()
+    change_date = models.DateTimeField(auto_now_add=True)
 
 
 class BarReceipt(models.Model):

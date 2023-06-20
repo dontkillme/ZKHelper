@@ -1,3 +1,5 @@
+import json
+
 from django.http.response import JsonResponse
 from apps.event.models import EventParticipant
 from rest_framework import viewsets, response
@@ -5,8 +7,11 @@ from django.http import Http404
 from generic.views import set_user_by_token
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from apps.bar.models import BarItem, BarReceiptItem, BarAccount
+from apps.bar.utils import add_account_change_log
+
 
 CHAR_MAP = {
     "a": "[aą]",
@@ -67,7 +72,39 @@ class BarAccountView(BarAccountRetrieverMixin, viewsets.ReadOnlyModelViewSet):
     pass
 
 
+@require_http_methods(["POST",])
+@csrf_exempt
+def change_bar_account_state(request):
+    error = set_user_by_token(request)
+    if error:
+        return error
+    if not request.user.has_perms(['bar.change_baraccount']):
+        return JsonResponse({"error": "missing permission"}, status=403, safe=False)
+    data = request.POST if request.POST else json.loads(request.body)
+    account = BarAccount.objects.get(participant_id=data.get("participant_id"))
+    action = data.get("action")
+    user_id = data.get("user_id")
+    if not action:
+        return JsonResponse({"error": "missing action in request"}, status=400, safe=False)
+
+    if not account or not user_id:
+        return JsonResponse({"error": "missing data in request"}, status=400, safe=False)
+
+    if action == "open":
+        action = BarAccount.STATE_ACTIVE
+    elif action == "close":
+        action = BarAccount.STATE_CLOSED
+    else:
+        return JsonResponse({"error": "action {} not valid".format(action)}, status=400, safe=False)
+
+    account.state = action
+    add_account_change_log("account changed to", action, account, user_id)
+    account.save()
+    return JsonResponse({"success": True}, safe=False)
+
+
 @require_http_methods(["GET",])
+@login_required
 @csrf_exempt
 def show_final_results(request):
     data = {"items": BarItem.objects.all(),

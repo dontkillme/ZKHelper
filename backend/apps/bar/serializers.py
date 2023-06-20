@@ -1,8 +1,8 @@
 from generic.serializers import create_generic_serializer
-from apps.bar.models import BarAccount, BarReceipt, BarItem, BarReceiptItem, BarItemCategory
+from apps.bar.models import BarAccount, BarReceipt, BarItem, BarReceiptItem, BarItemCategory, BarAccountLog
 from rest_framework import serializers
 from django.db import transaction
-
+from apps.bar.utils import add_account_change_log
 
 # dodatkowo crud dla wszystkich modeli barowych w admin panelu, krechy itd
 
@@ -14,8 +14,9 @@ class BarItemSerializer(serializers.ModelSerializer):
     category_id = serializers.IntegerField()
 
     class Meta:
+        ordering = ["-position",]
         model = BarItem
-        fields = ("id", "name", "price", "staff_price", "category_id", "modify_date", "available")
+        fields = ("id", "name", "price", "staff_price", "category_id", "modify_date", "available", "position")
 
 
 class BarReceiptItemSerializer(serializers.ModelSerializer):
@@ -91,24 +92,33 @@ class BarAccountSerializer(BarAccountBaseSerializer):
     receipts = BarReceiptsSerializer(many=True, read_only=True)
     balance = serializers.SerializerMethodField()
     participant_id = serializers.IntegerField()
+    inferring = serializers.IntegerField(write_only=True)
+    state = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = BarAccount
-        fields = ("participant_id", "nick", "receipts", "balance", "credits", "created_at")
+        fields = ("participant_id", "nick", "receipts", "balance", "credits", "created_at", "inferring", "state")
 
     def create(self, validated_data):
         try:
             bar_account = BarAccount.objects.get(participant_id=validated_data["participant_id"])
             bar_account.credits += validated_data['credits']
+            add_account_change_log("balance change", validated_data['credits'], bar_account, validated_data['inferring'])
+            if bar_account.state != BarAccount.STATE_ACTIVE:
+                bar_account.state = BarAccount.STATE_ACTIVE
+                add_account_change_log("opening account during insert", validated_data['credits'], bar_account,
+                                       validated_data['inferring'])
             bar_account.save()
         except BarAccount.DoesNotExist:
-            bar_account = BarAccount.objects.create(**validated_data)
-
+            inferring = validated_data.pop("inferring")
+            bar_account = BarAccount.objects.create(state=BarAccount.STATE_ACTIVE, **validated_data)
+            add_account_change_log("opening with input", validated_data['credits'], bar_account, inferring)
         bar_account.save()
         return bar_account
 
     def update(self, instance, validated_data):
         instance.credits += validated_data['credits']
+        add_account_change_log("balance change", validated_data['credits'], instance, validated_data['inferring'])
         instance.save()
         return instance
 
@@ -118,10 +128,11 @@ class BarAccountBasicInfoSerializer(BarAccountBaseSerializer):
     is_staff = serializers.BooleanField(source="participant.is_staff")
     balance = serializers.SerializerMethodField()
     participant_id = serializers.IntegerField()
+    state = serializers.IntegerField()
 
     class Meta:
         model = BarAccount
-        fields = ("balance", "is_staff", "participant_id", "credits", "nick")
+        fields = ("balance", "is_staff", "participant_id", "credits", "nick", "state")
 
 
 class BarAccountStackSerializer(BarAccountBaseSerializer):
@@ -150,3 +161,4 @@ class BarAccountStackSerializer(BarAccountBaseSerializer):
             output[key]["quantity"] += quantity
 
         return output.values()
+

@@ -14,7 +14,7 @@
 		},
 	});
 
-	const emit = defineEmits(['update:payCash']);
+	const emit = defineEmits(['update:payCash', 'update:dialogState']);
 
 	const payCashState = computed({
 		get: () => props.payCash,
@@ -35,6 +35,7 @@
 		addItemQuantityToOrder,
 		takeItemQuantityToOrder,
 		createBarReceipt,
+    clearOrder
 	} = useBarReceiptsStore();
 
 	const sending = ref(false);
@@ -43,7 +44,7 @@
 		sending.value = true;
 
 		try {
-			await createBarReceipt(payCashState);
+			await createBarReceipt(payCashState.value);
 		} catch (error) {
 			$q.notify({
 				type: 'negative',
@@ -65,6 +66,9 @@
 		});
 
 		sending.value = false;
+    emit('update:payCash', false);
+    emit('update:dialogState', false);
+    clearOrder();
 	}
 </script>
 

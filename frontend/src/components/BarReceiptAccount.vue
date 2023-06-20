@@ -84,7 +84,7 @@
 			</q-item>
 		</template>
 	</q-select>
-	<div v-if="basicInfoError||basicInfo?.state==0" class="text-center q-mb-sm text-red">
+	<div v-if="basicInfoError||basicInfo?.state===0" class="text-center q-mb-sm text-red">
 		<div>Uczestnik nie ma otwartego rachunku!</div>
 		<q-btn
 			v-if="isAllowed"

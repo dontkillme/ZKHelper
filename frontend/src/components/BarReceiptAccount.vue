@@ -6,6 +6,7 @@
 	import BarAddCreditsDialog from 'components/BarAddCreditsDialog.vue';
   import BarAccountStateDialog from 'components/BarAccountStateDialog.vue';
 	import { useAuthStore } from 'stores/AuthStore';
+import BarOrderDialog from './BarOrderDialog.vue';
 
 	
   const props = defineProps({
@@ -30,6 +31,7 @@
 	const receiptHistoryDialog = ref(false);
 	const addCreditsDialog = ref(false);
   const addAccountStateDialog = ref(false);
+  const editReceiptDialogShow = ref(false);
   const valAccountStateDialog = ref("");
 	const isAllowed = computed(() => hasPermission('logistyka'));
 
@@ -143,8 +145,10 @@
 
 	<BarReceiptHistoryDialog
 		v-model="receiptHistoryDialog"
+    v-model:editReceiptDialogShow="editReceiptDialogShow"
 		@add-credits-dialog-request="addCreditsDialog = true"
 	/>
 	<BarAddCreditsDialog v-model="addCreditsDialog" />
   <BarAccountStateDialog v-model="addAccountStateDialog" :action="valAccountStateDialog" />
+  <BarOrderDialog v-model="editReceiptDialogShow"/>
 </template>

@@ -13,6 +13,7 @@ type ReceiptHistoryApiResponse = Record<
 			item_name: string;
 			quantity: number;
 			price: string;
+      item_id: number;
 		};
 		created_at: string;
 		sum: string;
@@ -49,6 +50,7 @@ type RootState = {
 	basicInfoLoading: boolean;
 	basicInfoError: string | null;
 	accountListLoading: boolean;
+  orderId: number | null;
 	accountList: {
 		nick: string;
 		account: number;
@@ -78,6 +80,11 @@ function resetBasicInfoState(state: RootState) {
 	state.orderStaffPrices = false;
 }
 
+function resetOrderData(state: RootState) {
+  state.orderId = null;
+  state.orderItems = [];
+}
+
 export const useBarReceiptsStore = defineStore({
 	id: 'BarReceipts',
 	state: () =>
@@ -94,6 +101,7 @@ export const useBarReceiptsStore = defineStore({
 			accountList: [],
 			receiptHistoryListLoading: false,
 			receiptHistoryList: [],
+      orderId: null,
 		} as RootState),
 	getters: {
 		hasAnyItemsInOrder(state) {
@@ -121,6 +129,10 @@ export const useBarReceiptsStore = defineStore({
 	},
 	actions: {
 		clearOrder() {
+      if (this.orderId) {
+        resetOrderData(this);
+        return;
+      }
 			resetOrderState(this);
 			resetBasicInfoState(this);
 		},
@@ -149,7 +161,22 @@ export const useBarReceiptsStore = defineStore({
 				}
 			}
 		},
-		async fetchReceiptHistory() {
+    setOrderItemsFromReceipt(receipt) {
+      this.orderItems = [];
+      for (const item of receipt.items) {
+        this.orderItems.push({
+					itemId: item.item_id,
+					quantity: item.quantity,
+				});
+      }
+      this.orderId = receipt.id
+    },
+    updateReceiptHistory() {
+      if (this.orderId) {
+        this.fetchReceiptHistory();
+      }
+    },
+    async fetchReceiptHistory() {
 			this.receiptHistoryListLoading = true;
 
 			try {
@@ -166,6 +193,7 @@ export const useBarReceiptsStore = defineStore({
 						name: i.item_name,
 						quantity: i.quantity,
 						price: parseFloat(i.price),
+            item_id: i.item_id
 					})),
 				}));
 			} catch (error) {
@@ -254,10 +282,13 @@ export const useBarReceiptsStore = defineStore({
         data['account'] = this.orderAccount?.value
       }
 
-			await api.post('/bar/receipt/', data);
-
-			resetOrderState(this);
-			resetBasicInfoState(this);
+      if (this.orderId) {
+        await api.put(`/bar/receipt/${this.orderId}/`, data);
+      } else {
+        await api.post('/bar/receipt/', data);
+        resetOrderState(this);
+        resetBasicInfoState(this);
+      }
 		},
 	},
 });

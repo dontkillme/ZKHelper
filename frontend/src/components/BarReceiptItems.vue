@@ -35,7 +35,8 @@
 		addItemQuantityToOrder,
 		takeItemQuantityToOrder,
 		createBarReceipt,
-    clearOrder
+    clearOrder,
+    updateReceiptHistory
 	} = useBarReceiptsStore();
 
 	const sending = ref(false);
@@ -68,6 +69,7 @@
 		sending.value = false;
     emit('update:payCash', false);
     emit('update:dialogState', false);
+    updateReceiptHistory();
     clearOrder();
 	}
 </script>

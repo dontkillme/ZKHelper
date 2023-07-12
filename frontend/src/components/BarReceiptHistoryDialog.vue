@@ -12,7 +12,7 @@
 			required: true,
 		},
 	});
-	const emit = defineEmits(['addCreditsDialogRequest', 'update:modelValue']);
+	const emit = defineEmits(['addCreditsDialogRequest', 'update:modelValue', 'update:editReceiptDialogShow']);
 
 	const dialogState = computed({
 		get: () => props.modelValue,
@@ -27,8 +27,12 @@
 	} = storeToRefs(useBarReceiptsStore());
 	const { hasPermission } = useAuthStore();
 
-	const { fetchReceiptHistory } = useBarReceiptsStore();
+	const { fetchReceiptHistory, setOrderItemsFromReceipt } = useBarReceiptsStore();
 	const isAllowed = computed(() => hasPermission('logistyka'));
+  function onReceiptClick(receipt) {
+    emit('update:editReceiptDialogShow', true);
+    setOrderItemsFromReceipt(receipt)
+  }
 </script>
 
 <template>
@@ -114,7 +118,14 @@
 						<q-item-section>
 							<q-item-label>
 								<div class="row justify-between text-body1">
-									<div>{{ $currency(receipt.sum) }}</div>
+									<div>
+                    {{ $currency(receipt.sum) }}
+                    <q-btn
+                      color="primary"
+                      size="sm"
+                      @click="onReceiptClick(receipt)"
+                    >Edycja</q-btn>
+                  </div>
 									<div class="text-grey-5">
 										{{
 											date.formatDate(

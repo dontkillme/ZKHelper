@@ -40,28 +40,42 @@ class BarReceiptsSerializer(serializers.ModelSerializer):
             raise Exception("Missing item list")
         return super().is_valid(raise_exception=raise_exception)
 
+    def update(self, instance, validated_data):
+        with transaction.atomic():
+            instance.bar_items.all().delete()
+            output = self._create_or_update_receipt(validated_data, instance)
+            return output 
+
     def create(self, validated_data):
         with transaction.atomic():
-            receipt_items = self.items
-            items_to_create = []
-            items = self._get_items_instances()
-            receipt_sum = self._calc_receipt_sum(items, receipt_items, self.staff_price)
+            return self._create_or_update_receipt(validated_data)
+
+    def _create_or_update_receipt(self, validated_data, bar_receipt=None):
+        receipt_items = self.items
+        items_to_create = []
+        items = self._get_items_instances()
+        receipt_sum = self._calc_receipt_sum(items, receipt_items, self.staff_price)
+        if bar_receipt and bar_receipt.account_id and 'account' not in validated_data:
+            bar_receipt.account = None
+        elif bar_receipt and bar_receipt.account_id != validated_data.get('account', -1):
+            bar_receipt.account = validated_data['account']
+        if not bar_receipt:
             bar_receipt = BarReceipt.objects.create(**validated_data)
-            for receipt_item in receipt_items:
-                item = items[receipt_item["item_id"]]
-                price = item.staff_price if self.staff_price else item.price
-                filled_receipt_item = {
-                    **receipt_item,
-                    "item_name": item.name,
-                    "price": price
-                }
-                items_to_create.append(BarReceiptItem(**filled_receipt_item, bar_receipt=bar_receipt))
-            BarReceiptItem.objects.bulk_create(items_to_create)
-            #to rewrite this
-            bar_receipt.price_mode = self.staff_price
-            bar_receipt.sum = receipt_sum
-            bar_receipt.save()
-            return bar_receipt
+        for receipt_item in receipt_items:
+            item = items[receipt_item["item_id"]]
+            price = item.staff_price if self.staff_price else item.price
+            filled_receipt_item = {
+                **receipt_item,
+                "item_name": item.name,
+                "price": price
+            }
+            items_to_create.append(BarReceiptItem(**filled_receipt_item, bar_receipt=bar_receipt))
+        BarReceiptItem.objects.bulk_create(items_to_create)
+        # to rewrite this
+        bar_receipt.price_mode = self.staff_price
+        bar_receipt.sum = receipt_sum
+        bar_receipt.save()
+        return bar_receipt
 
     def _get_items_instances(self):
         if not self.items:

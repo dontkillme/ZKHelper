@@ -173,6 +173,7 @@ export const useBarReceiptsStore = defineStore({
     },
     updateReceiptHistory() {
       if (this.orderId) {
+        this.fetchAccountBasicInfo();
         this.fetchReceiptHistory();
       }
     },

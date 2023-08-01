@@ -12,6 +12,11 @@
 			type: Boolean,
 			required: true,
 		},
+    isMassEdit: {
+      type: Boolean,
+      required: false,
+      default: false
+    }
 	});
 
 	const emit = defineEmits(['update:payCash', 'update:dialogState']);
@@ -19,6 +24,11 @@
 	const payCashState = computed({
 		get: () => props.payCash,
 		set: (payCashState) => emit('update:payCash', payCashState),
+	});
+
+	const isMassEditState = computed({
+		get: () => props.isMassEdit,
+		set: () => null,
 	});
 
 	const {
@@ -69,7 +79,9 @@
 		sending.value = false;
     emit('update:payCash', false);
     emit('update:dialogState', false);
-    updateReceiptHistory();
+    if (!isMassEditState.value) {
+      updateReceiptHistory();
+    }
     clearOrder();
 	}
 </script>

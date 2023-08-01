@@ -8,6 +8,11 @@ import BarReceiptItems from 'components/BarReceiptItems.vue';
 			type: Boolean,
 			required: true,
 		},
+    isMassEdit: {
+			type: Boolean,
+			required: false,
+      default: false
+		},
 	});
 	const emit = defineEmits(['update:modelValue']);
 	const payByCash = ref(false);
@@ -39,7 +44,7 @@ import BarReceiptItems from 'components/BarReceiptItems.vue';
 			<q-separator />
 
 			<q-card-section>
-				<BarReceiptItems v-model:payCash="payByCash" v-model:dialog-state="dialogState"/>
+				<BarReceiptItems v-model:payCash="payByCash" v-model:dialog-state="dialogState" isMassEdit="isMassEdit"/>
 			</q-card-section>
 		</q-card>
 	</q-dialog>

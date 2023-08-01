@@ -12,6 +12,7 @@
 	import { useAuthStore } from 'stores/AuthStore';
 	import { useBarReceiptsStore } from 'stores/BarReceipts';
 	import EmptyComponent from 'components/EmptyComponent.vue';
+import BarLatestReceiptList from 'src/components/BarLatestReceiptList.vue';
   
 
 	const { hasPermission } = useAuthStore();
@@ -21,6 +22,7 @@
 
 	const orderClearConfirm = ref(false);
   const showOrderDialog = ref(false);
+  const showLatestReceiptDialog = ref(false);
 	const isAllowed = computed(
 		() => hasPermission('bar') || hasPermission('logistyka')
 	);
@@ -69,6 +71,15 @@
                     Wyczyść zamówienie
                   </q-btn>
                 </div>
+                <div class="col-auto">
+                  <q-btn
+                    color="primary"
+                    size="lg"
+                    @click="showLatestReceiptDialog = true"
+                  >
+                    Ostatnie zamówienia
+                  </q-btn>
+                </div>
               </div>
             </q-page-sticky>
 						<BarItems />
@@ -86,7 +97,7 @@
 	</q-page>
 
   <BarOrderDialog v-model="showOrderDialog" />
-
+  <BarLatestReceiptList v-model="showLatestReceiptDialog" />
 	<q-dialog v-model="orderClearConfirm">
 		<q-card>
 			<q-card-section>

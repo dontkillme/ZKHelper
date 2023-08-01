@@ -50,7 +50,8 @@ router.register(
             "PATCH": ["bar.change_barreceipt", ],
             "DELETE": ["bar.delete_barreceipt", ]
         },
-        query=BarReceipt.objects.all().order_by("-created_at")
+        query=BarReceipt.objects.all().order_by("-created_at"),
+        with_pagination=True
     )
 )
 router.register(

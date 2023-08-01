@@ -57,7 +57,7 @@ class BarReceiptsSerializer(serializers.ModelSerializer):
         receipt_sum = self._calc_receipt_sum(items, receipt_items, self.staff_price)
         if bar_receipt and bar_receipt.account_id and 'account' not in validated_data:
             bar_receipt.account = None
-        elif bar_receipt and bar_receipt.account_id != validated_data.get('account', -1):
+        elif bar_receipt and 'account' in validated_data and bar_receipt.account_id != validated_data.get('account', -1):
             bar_receipt.account = validated_data['account']
         if not bar_receipt:
             bar_receipt = BarReceipt.objects.create(**validated_data)

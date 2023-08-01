@@ -128,6 +128,9 @@ export const useBarReceiptsStore = defineStore({
 		},
 	},
 	actions: {
+    setCurrentAccount(accountId) {
+      this.orderAccount = accountId;
+    },
 		clearOrder() {
       if (this.orderId) {
         resetOrderData(this);
@@ -177,16 +180,23 @@ export const useBarReceiptsStore = defineStore({
         this.fetchReceiptHistory();
       }
     },
-    async fetchReceiptHistory() {
+    async fetchReceiptHistory(accountFilter=true,pageSize=null,page=null) {
 			this.receiptHistoryListLoading = true;
-
+      let filter = accountFilter ? `?account=${this.orderAccount?.value}&` : "?"
+      filter += (pageSize ? `page_size=${pageSize}` : '');
+      filter += (page ? `page=${page}` : '');
+      
 			try {
-				const { data } = await api.get<ReceiptHistoryApiResponse>(
-					`/bar/receipt/?account=${this.orderAccount?.value}`
+				let { data } = await api.get<ReceiptHistoryApiResponse>(
+					'/bar/receipt/' + filter
 				);
 
+        if (data.results) {
+          data = data.results;
+        }
 				this.receiptHistoryList = data.map((v) => ({
 					id: v.id,
+          account: v.account ?? null,
 					createdAt: new Date(v.created_at),
 					sum: parseFloat(v.sum),
 					items: v.bar_items.map((i) => ({
@@ -221,21 +231,23 @@ export const useBarReceiptsStore = defineStore({
 
 			this.accountListLoading = false;
 		},
-		async fetchAccountBasicInfo() {
-			if (!this.orderAccount) {
+		async fetchAccountBasicInfo(e, accountID=null) {
+			if (!this.orderAccount && !accountID) {
 				resetBasicInfoState(this);
 				this.basicInfoLoading = false;
 				this.basicInfoError = null;
 
 				return;
 			}
+      console.log(accountID)
 
 			this.basicInfoLoading = true;
 			this.basicInfoError = null;
+      const personIDToSend= accountID ? accountID : this.orderAccount?.value;
 
 			try {
 				const { data } = await api.get<BasicInfoApiResponse>(
-					`/bar/account_basics/${this.orderAccount?.value}/`
+					`/bar/account_basics/${personIDToSend}/`
 				);
 
 				this.basicInfo = {
@@ -280,7 +292,7 @@ export const useBarReceiptsStore = defineStore({
 			}
 
       if (this.orderAccount && !noAccount) {
-        data['account'] = this.orderAccount?.value
+        data['account'] = this.orderAccount?.value ? this.orderAccount.value : this.orderAccount;
       }
 
       if (this.orderId) {

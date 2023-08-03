@@ -25,9 +25,12 @@
 		receiptHistoryListLoading,
 		receiptHistoryList,
 		orderAccount,
+    page,
+    maxPage,
+    pageSize
 	} = storeToRefs(useBarReceiptsStore());
   
-  const { fetchAccountBasicInfo, setCurrentAccount, clearOrder } = useBarReceiptsStore();
+  const { fetchAccountBasicInfo, setCurrentAccount, clearOrder, changePageAndGetNewData } = useBarReceiptsStore();
 	const { hasPermission } = useAuthStore();
 
   const editReceiptDialogShow = ref(false);
@@ -45,7 +48,7 @@
 </script>
 
 <template>
-	<q-dialog v-model="dialogState" @before-show="() => fetchReceiptHistory(false, 10)" @before-hide="() => clearOrder()">
+	<q-dialog v-model="dialogState" @before-show="() => fetchReceiptHistory(false, pageSize, page)" @before-hide="() => clearOrder()">
 		<q-card style="width: 30rem; max-width: 80vw">
 			<q-card-section class="q-pa-none">
 				<q-list separator>
@@ -132,6 +135,15 @@
 						</q-item-section>
 					</q-item>
 				</q-list>
+        <q-list separator>
+          <q-separator/>
+          <q-pagination
+            v-model="page"
+            :max="maxPage"
+            input
+            @update:model-value="(page)=>changePageAndGetNewData(page)"
+          />
+        </q-list>
 			</q-card-section>
 		</q-card>
 	</q-dialog>

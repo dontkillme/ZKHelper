@@ -102,6 +102,9 @@ export const useBarReceiptsStore = defineStore({
 			receiptHistoryListLoading: false,
 			receiptHistoryList: [],
       orderId: null,
+      page: 1,
+      maxPage: 1,
+      pageSize: 15
 		} as RootState),
 	getters: {
 		hasAnyItemsInOrder(state) {
@@ -130,6 +133,10 @@ export const useBarReceiptsStore = defineStore({
 	actions: {
     setCurrentAccount(accountId) {
       this.orderAccount = accountId;
+    },
+    changePageAndGetNewData(page) {
+      this.page = page;
+      this.fetchReceiptHistory(false, this.pageSize);
     },
 		clearOrder() {
       if (this.orderId) {
@@ -184,7 +191,10 @@ export const useBarReceiptsStore = defineStore({
 			this.receiptHistoryListLoading = true;
       let filter = accountFilter ? `?account=${this.orderAccount?.value}&` : "?"
       filter += (pageSize ? `page_size=${pageSize}` : '');
-      filter += (page ? `page=${page}` : '');
+      if (page)
+        this.page = page
+      if (pageSize)
+        filter += `&page=${this.page}`
       
 			try {
 				let { data } = await api.get<ReceiptHistoryApiResponse>(
@@ -192,6 +202,7 @@ export const useBarReceiptsStore = defineStore({
 				);
 
         if (data.results) {
+          this.maxPage = Math.ceil(data.count/pageSize);
           data = data.results;
         }
 				this.receiptHistoryList = data.map((v) => ({

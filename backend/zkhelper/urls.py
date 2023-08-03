@@ -19,7 +19,8 @@ from generic.urls import urlpatterns as generic_urls
 from rest_framework.authtoken.views import ObtainAuthToken
 from apps.event.urls import urlpatterns as event_urls
 from apps.bar.urls import urlpatterns as bar_urls
-
+from django.conf import settings
+from django.conf.urls.static import static
 
 class MyAuth(ObtainAuthToken):
     authentication_classes = []
@@ -31,4 +32,4 @@ urlpatterns = [
     path('', include(generic_urls)),
     path('event/', include(event_urls)),
     path('bar/', include(bar_urls)),
-]
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

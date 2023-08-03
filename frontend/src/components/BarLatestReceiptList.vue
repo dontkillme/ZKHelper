@@ -1,0 +1,139 @@
+<script setup lang="ts">
+	import { computed } from 'vue';
+  import { ref } from 'vue';
+	import { storeToRefs } from 'pinia';
+	import { useBarReceiptsStore } from 'stores/BarReceipts';
+	import { useAuthStore } from 'stores/AuthStore';
+	import { date } from 'quasar';
+	import EmptyComponent from 'components/EmptyComponent.vue';
+  import BarOrderDialog from './BarOrderDialog.vue';
+
+	const props = defineProps({
+		modelValue: {
+			type: Boolean,
+			required: true,
+		},
+	});
+	const emit = defineEmits(['addCreditsDialogRequest', 'update:modelValue', 'update:editReceiptDialogShow']);
+
+	const dialogState = computed({
+		get: () => props.modelValue,
+		set: (dialogState) => emit('update:modelValue', dialogState),
+	});
+
+	const {
+		receiptHistoryListLoading,
+		receiptHistoryList,
+		orderAccount,
+	} = storeToRefs(useBarReceiptsStore());
+  
+  const { fetchAccountBasicInfo, setCurrentAccount, clearOrder } = useBarReceiptsStore();
+	const { hasPermission } = useAuthStore();
+
+  const editReceiptDialogShow = ref(false);
+  const isMassEdit = ref(true);
+	const { fetchReceiptHistory, setOrderItemsFromReceipt } = useBarReceiptsStore();
+  const alwaysTrue = ref(true);
+  function onReceiptClick(receipt) {
+    if (receipt.account) {
+      setCurrentAccount(receipt.account);
+      fetchAccountBasicInfo(null, receipt.account);
+    }
+    this.editReceiptDialogShow=true;
+    setOrderItemsFromReceipt(receipt)
+  }
+</script>
+
+<template>
+	<q-dialog v-model="dialogState" @before-show="() => fetchReceiptHistory(false, 10)" @before-hide="() => clearOrder()">
+		<q-card style="width: 30rem; max-width: 80vw">
+			<q-card-section class="q-pa-none">
+				<q-list separator>
+					<q-item-label header>Zamówienia</q-item-label>
+					<q-separator />
+				</q-list>
+				<q-list
+					v-if="receiptHistoryListLoading"
+					separator
+					class="scroll"
+					style="max-height: 50vh"
+				>
+					<q-item v-for="n in 3" :key="n">
+						<q-skeleton
+							animation="fade"
+							height="6rem"
+							width="100%"
+						/>
+					</q-item>
+				</q-list>
+				<q-list
+					v-if="!receiptHistoryListLoading"
+					separator
+					class="scroll"
+					style="max-height: 50vh"
+				>
+					<EmptyComponent
+						v-if="
+							!receiptHistoryListLoading &&
+							!receiptHistoryList.length
+						"
+						icon="receipt_long"
+						primary="Brak zamówień!"
+						secondary="Uczestnik nie posiada zamówień na swoim rachunku."
+						class="q-my-md"
+					/>
+					<q-item
+						v-for="receipt in receiptHistoryList"
+						:key="receipt.id"
+					>
+						<q-item-section>
+							<q-item-label>
+								<div class="row justify-between text-body1">
+									<div>
+                    {{ $currency(receipt.sum) }}
+                    <q-btn
+                      color="primary"
+                      size="sm"
+                      @click="onReceiptClick(receipt)"
+                    >Edycja</q-btn>
+                  </div>
+									<div class="text-grey-5">
+                    {{ receipt.account ? `[${receipt.account}]` : "" }}
+										{{
+											date.formatDate(
+												receipt.createdAt,
+												'YYYY.MM.DD HH:mm'
+											)
+										}}
+									</div>
+								</div>
+							</q-item-label>
+							<q-item-label
+								v-for="item in receipt.items"
+								:key="item.id"
+							>
+								<div class="row justify-between text-body2">
+									<div class="col-auto">
+										{{ item.quantity }} x {{ item.name }}
+									</div>
+									<div class="col-auto">
+										<span class="text-secondary"
+											>{{ item.quantity }} x
+											{{ $currency(item.price) }} =</span
+										>
+										{{
+											$currency(
+												item.quantity * item.price
+											)
+										}}
+									</div>
+								</div>
+							</q-item-label>
+						</q-item-section>
+					</q-item>
+				</q-list>
+			</q-card-section>
+		</q-card>
+	</q-dialog>
+  <BarOrderDialog v-model="editReceiptDialogShow" v-model:isMassEdit="isMassEdit"/>
+</template>
